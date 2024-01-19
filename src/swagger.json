@@ -1,0 +1,486 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"FeeEstimateResponse": {
+				"properties": {
+					"feeInfo": {
+						"properties": {
+							"high_fee_per_kb": {
+								"type": "number",
+								"format": "double"
+							},
+							"medium_fee_per_kb": {
+								"type": "number",
+								"format": "double"
+							},
+							"low_fee_per_kb": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"high_fee_per_kb",
+							"medium_fee_per_kb",
+							"low_fee_per_kb"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"feeInfo"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AddressHiroObject": {
+				"properties": {
+					"non_fungible_tokens": {},
+					"fungible_tokens": {},
+					"stx": {
+						"properties": {
+							"burnchain_unlock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"burnchain_lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"locked": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_tx_id": {
+								"type": "string"
+							},
+							"total_received": {
+								"type": "number",
+								"format": "double"
+							},
+							"total_sent": {
+								"type": "number",
+								"format": "double"
+							},
+							"balance": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"burnchain_unlock_height",
+							"burnchain_lock_height",
+							"lock_height",
+							"locked",
+							"lock_tx_id",
+							"total_received",
+							"total_sent",
+							"balance"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"non_fungible_tokens",
+					"fungible_tokens",
+					"stx"
+				],
+				"type": "object"
+			},
+			"AddressMempoolObject": {
+				"properties": {
+					"mempool_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"chain_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"mempool_stats",
+					"chain_stats",
+					"address"
+				],
+				"type": "object"
+			},
+			"AddressObject": {
+				"properties": {
+					"btcPubkeySegwit1": {
+						"type": "string"
+					},
+					"btcPubkeySegwit0": {
+						"type": "string"
+					},
+					"ordinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"cardinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"stacksTokenInfo": {
+						"$ref": "#/components/schemas/AddressHiroObject"
+					},
+					"stxBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"sBTCBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"ordinal": {
+						"type": "string"
+					},
+					"cardinal": {
+						"type": "string"
+					},
+					"stxAddress": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"stxBalance",
+					"sBTCBalance",
+					"ordinal",
+					"cardinal",
+					"stxAddress"
+				],
+				"type": "object"
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "uasu-api",
+		"version": "1.0.0",
+		"description": "Proxy server for ordicall web application to access ordinals and bitcoin servers",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/uasu-api/{network}/v1/config": {
+			"get": {
+				"operationId": "GetAllParam",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/uasu-api/{network}/v1/config/{param}": {
+			"get": {
+				"operationId": "GetParam",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "number",
+											"format": "double"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "param",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/uasu-api/{network}/v1/btc/wallet/address/{address}/txs": {
+			"get": {
+				"operationId": "FetchAddressTransactions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/uasu-api/{network}/v1/btc/wallet/loadwallet/{name}": {
+			"get": {
+				"operationId": "LoadWallet",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/uasu-api/{network}/v1/btc/wallet/listwallets": {
+			"get": {
+				"operationId": "ListWallets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/uasu-api/{network}/v1/btc/blocks/fee-estimate": {
+			"get": {
+				"operationId": "GetFeeEstimate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FeeEstimateResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/uasu-api/{network}/v1/btc/blocks/info": {
+			"get": {
+				"operationId": "GetInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/uasu-api/{network}/v1/btc/blocks/count": {
+			"get": {
+				"operationId": "GetCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/uasu-api/{network}/v1/stacks/address/{stxAddress}/{cardinal}/{ordinal}": {
+			"get": {
+				"operationId": "FetchUserBalances",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AddressObject"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "stxAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "cardinal",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "ordinal",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/uasu-api/{network}/v1/dlc/is-registered/{contractId}": {
+			"get": {
+				"operationId": "IsRegistered",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "contractId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
