@@ -44,18 +44,16 @@ $DOCKER_CMD push mijoco/uasu_api:latest
     source /home/bob/.profile;
     docker run -d -t -i --name ${DOCKER_NAME} -p 5010:5010 \
       -e TARGET_ENV=${TARGET_ENV} \
-      -e btcSchnorrReveal=${UASU_BTC_SCHNORR_KEY_REVEAL} \
-      -e btcSchnorrReclaim=${UASU_BTC_SCHNORR_KEY_RECLAIM} \
-      -e btcSchnorrOracle=${UASU_BTC_SCHNORR_KEY_ORACLE} \
-      -e btcRpcUser=${UASU_BTC_RPC_USER} \
-      -e btcRpcPwd=${UASU_BTC_RPC_PWD} \
-      -e btcNode=${UASU_BTC_NODE} \
       -e mongoDbUrl=${UASU_MONGO_SBTC_URL} \
       -e mongoDbName=uasu1 \
       -e mongoUser=${UASU_MONGO_SBTC_USER} \
       -e mongoPwd=${UASU_MONGO_SBTC_PWD} \
-      -e mailChimpApiKey=${UASU_MAILCHIMP_KEY} \
-      -e mailChimpAudience=${UASU_MAILCHIMP_AUDIENCE} \
+      -e btcNode=${UASU_BTC_NODE} \
+      -e btcRpcUser=${UASU_BTC_RPC_USER} \
+      -e btcRpcPwd=${UASU_BTC_RPC_PWD} \
+      -e btcSchnorrReveal=${UASU_BTC_SCHNORR_KEY_REVEAL} \
+      -e btcSchnorrReclaim=${UASU_BTC_SCHNORR_KEY_RECLAIM} \
+      -e btcSchnorrOracle=${UASU_BTC_SCHNORR_KEY_ORACLE} \
       mijoco/uasu_api
   ";
 

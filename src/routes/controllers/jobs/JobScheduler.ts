@@ -1,15 +1,12 @@
 import cron from 'node-cron';
-import { jobSaveDLCEvents } from '../dlclink/dlc_helper';
+import { scanForPayments } from '../../commit/commitHelper';
 
-export const updateEventLogJob = cron.schedule('*/5 * * * *', (fireDate) => {
-  console.log('Running: sbtcEventJob at: ' + fireDate);
-});
-
-export const dlcManagerEvents = cron.schedule('*/5 * * * *', (fireDate) => {
-  console.log('Running: sbtcEventJob at: ' + fireDate);
+export const scanForPaymentsJob = cron.schedule('*/11 * * * *', (fireDate) => {
+  console.log('Running: peginRequestJob at: ' + fireDate);
   try {
-    jobSaveDLCEvents();
+    scanForPayments();
   } catch (err) {
-    console.log('Error running: jobSaveDLCEvents: ', err);
+    console.log('Error running: scanForPaymentsJob: ', err);
   }
 });
+

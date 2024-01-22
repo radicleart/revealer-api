@@ -6,319 +6,233 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"FeeEstimateResponse": {
+			"CommitmentRequest": {
 				"properties": {
-					"feeInfo": {
-						"properties": {
-							"high_fee_per_kb": {
-								"type": "number",
-								"format": "double"
-							},
-							"medium_fee_per_kb": {
-								"type": "number",
-								"format": "double"
-							},
-							"low_fee_per_kb": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"high_fee_per_kb",
-							"medium_fee_per_kb",
-							"low_fee_per_kb"
-						],
-						"type": "object"
+					"inscriptionPayload": {
+						"type": "string"
+					},
+					"recipientStxPrincipal": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					},
+					"payFromAddress": {
+						"type": "string"
+					},
+					"reclaimerPublicKey": {
+						"type": "string"
+					},
+					"revealerPublicKey": {
+						"type": "string"
+					},
+					"revealFee": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"feeInfo"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"AddressHiroObject": {
-				"properties": {
-					"non_fungible_tokens": {},
-					"fungible_tokens": {},
-					"stx": {
-						"properties": {
-							"burnchain_unlock_height": {
-								"type": "number",
-								"format": "double"
-							},
-							"burnchain_lock_height": {
-								"type": "number",
-								"format": "double"
-							},
-							"lock_height": {
-								"type": "number",
-								"format": "double"
-							},
-							"locked": {
-								"type": "number",
-								"format": "double"
-							},
-							"lock_tx_id": {
-								"type": "string"
-							},
-							"total_received": {
-								"type": "number",
-								"format": "double"
-							},
-							"total_sent": {
-								"type": "number",
-								"format": "double"
-							},
-							"balance": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"burnchain_unlock_height",
-							"burnchain_lock_height",
-							"lock_height",
-							"locked",
-							"lock_tx_id",
-							"total_received",
-							"total_sent",
-							"balance"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"non_fungible_tokens",
-					"fungible_tokens",
-					"stx"
+					"originator",
+					"reclaimerPublicKey",
+					"revealerPublicKey",
+					"revealFee"
 				],
 				"type": "object"
 			},
-			"AddressMempoolObject": {
+			"Uint8Array": {
+				"description": "A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the\r\nrequested number of bytes could not be allocated an exception is raised.",
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TaprootScriptType": {
 				"properties": {
-					"mempool_stats": {
-						"properties": {
-							"tx_count": {
-								"type": "number",
-								"format": "double"
+					"tweakedPubkey": {
+						"anyOf": [
+							{
+								"type": "string"
 							},
-							"spent_txo_sum": {
-								"type": "number",
-								"format": "double"
-							},
-							"spent_txo_count": {
-								"type": "number",
-								"format": "double"
-							},
-							"funded_txo_sum": {
-								"type": "number",
-								"format": "double"
-							},
-							"funded_txo_count": {
-								"type": "number",
-								"format": "double"
+							{
+								"$ref": "#/components/schemas/Uint8Array"
 							}
-						},
-						"required": [
-							"tx_count",
-							"spent_txo_sum",
-							"spent_txo_count",
-							"funded_txo_sum",
-							"funded_txo_count"
-						],
-						"type": "object"
+						]
 					},
-					"chain_stats": {
-						"properties": {
-							"tx_count": {
-								"type": "number",
-								"format": "double"
+					"tapMerkleRoot": {
+						"anyOf": [
+							{
+								"type": "string"
 							},
-							"spent_txo_sum": {
-								"type": "number",
-								"format": "double"
-							},
-							"spent_txo_count": {
-								"type": "number",
-								"format": "double"
-							},
-							"funded_txo_sum": {
-								"type": "number",
-								"format": "double"
-							},
-							"funded_txo_count": {
-								"type": "number",
-								"format": "double"
+							{
+								"$ref": "#/components/schemas/Uint8Array"
 							}
-						},
-						"required": [
-							"tx_count",
-							"spent_txo_sum",
-							"spent_txo_count",
-							"funded_txo_sum",
-							"funded_txo_count"
-						],
-						"type": "object"
+						]
+					},
+					"tapLeafScript": {},
+					"tapInternalKey": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"leaves": {},
+					"wsh": {
+						"type": "string"
+					},
+					"witnessScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"redeemScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"paymentType": {
+						"type": "string"
+					},
+					"script": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
 					},
 					"address": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"mempool_stats",
-					"chain_stats",
+					"paymentType",
 					"address"
 				],
 				"type": "object"
 			},
-			"AddressObject": {
+			"VoutI": {
 				"properties": {
-					"btcPubkeySegwit1": {
-						"type": "string"
-					},
-					"btcPubkeySegwit0": {
-						"type": "string"
-					},
-					"ordinalInfo": {
-						"$ref": "#/components/schemas/AddressMempoolObject"
-					},
-					"cardinalInfo": {
-						"$ref": "#/components/schemas/AddressMempoolObject"
-					},
-					"stacksTokenInfo": {
-						"$ref": "#/components/schemas/AddressHiroObject"
-					},
-					"stxBalance": {
+					"value": {
 						"type": "number",
 						"format": "double"
 					},
-					"sBTCBalance": {
-						"type": "number",
-						"format": "double"
-					},
-					"ordinal": {
+					"scriptpubkey_address": {
 						"type": "string"
 					},
-					"cardinal": {
+					"scriptpubkey_type": {
 						"type": "string"
 					},
-					"stxAddress": {
+					"scriptpubkey_asm": {
+						"type": "string"
+					},
+					"scriptpubkey": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"stxBalance",
-					"sBTCBalance",
-					"ordinal",
-					"cardinal",
-					"stxAddress"
+					"value",
+					"scriptpubkey_address",
+					"scriptpubkey_type",
+					"scriptpubkey_asm",
+					"scriptpubkey"
 				],
 				"type": "object"
 			},
-			"KeySet": {
+			"CommitmentType": {
 				"properties": {
-					"deposits": {
-						"properties": {
-							"oraclePubKey": {
-								"type": "string"
-							},
-							"reclaimPubKey": {
-								"type": "string"
-							},
-							"revealPubKey": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"oraclePubKey",
-							"reclaimPubKey",
-							"revealPubKey"
-						],
-						"type": "object"
+					"vout": {
+						"$ref": "#/components/schemas/VoutI"
+					},
+					"vout0": {
+						"$ref": "#/components/schemas/VoutI"
+					},
+					"taprootScript": {
+						"$ref": "#/components/schemas/TaprootScriptType"
+					},
+					"btcTxid": {
+						"type": "string"
+					},
+					"requestType": {
+						"type": "string"
+					},
+					"updated": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"network": {
+						"type": "string"
+					},
+					"tries": {
+						"type": "number",
+						"format": "double"
+					},
+					"_id": {
+						"type": "string"
+					},
+					"commitmentRequest": {
+						"$ref": "#/components/schemas/CommitmentRequest"
 					}
 				},
 				"required": [
-					"deposits"
+					"taprootScript",
+					"requestType",
+					"updated",
+					"created",
+					"status",
+					"network",
+					"commitmentRequest"
 				],
 				"type": "object"
 			},
-			"SbtcContractDataType": {
+			"CommitmentError": {
 				"properties": {
-					"burnHeight": {
-						"type": "number",
-						"format": "double"
-					},
-					"name": {
+					"message": {
 						"type": "string"
 					},
-					"decimals": {
-						"type": "number",
-						"format": "double"
-					},
-					"totalSupply": {
-						"type": "number",
-						"format": "double"
-					},
-					"threshold": {
-						"type": "number",
-						"format": "double"
-					},
-					"tokenUri": {
+					"code": {
 						"type": "string"
-					},
-					"tradingHalted": {
-						"type": "boolean"
-					},
-					"numParties": {
-						"type": "number",
-						"format": "double"
-					},
-					"numKeys": {
-						"type": "number",
-						"format": "double"
-					},
-					"sbtcWalletPublicKey": {
-						"type": "string"
-					},
-					"sbtcWalletAddress": {
-						"type": "string"
-					},
-					"contractOwner": {
-						"type": "string"
-					},
-					"contractId": {
-						"type": "string"
-					},
-					"coordinator": {
-						"properties": {
-							"key": {
-								"type": "string"
-							},
-							"addr": {
-								"properties": {
-									"value": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"value"
-								],
-								"type": "object"
-							}
-						},
-						"required": [
-							"key",
-							"addr"
-						],
-						"type": "object"
 					}
 				},
 				"required": [
-					"sbtcWalletPublicKey",
-					"sbtcWalletAddress",
-					"contractOwner",
-					"contractId"
+					"message",
+					"code"
+				],
+				"type": "object"
+			},
+			"CommitmentResponse": {
+				"properties": {
+					"paymentPsbt": {
+						"type": "string"
+					},
+					"commitAddress": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"commitAddress"
 				],
 				"type": "object"
 			}
@@ -336,7 +250,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/uasu-api/{network}/v1/config": {
+		"/revealer-api/v1/config": {
 			"get": {
 				"operationId": "GetAllParam",
 				"responses": {
@@ -353,7 +267,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/config/{param}": {
+		"/revealer-api/v1/config/{param}": {
 			"get": {
 				"operationId": "GetParam",
 				"responses": {
@@ -389,357 +303,114 @@
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/address/{address}/txs": {
+		"/revealer-api/v1/commitment/{paymentAddress}": {
 			"get": {
-				"operationId": "FetchAddressTransactions",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "address",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/uasu-api/{network}/v1/btc/wallet/loadwallet/{name}": {
-			"get": {
-				"operationId": "LoadWallet",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "name",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/uasu-api/{network}/v1/btc/wallet/listwallets": {
-			"get": {
-				"operationId": "ListWallets",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/btc/blocks/fee-estimate": {
-			"get": {
-				"operationId": "GetFeeEstimate",
+				"operationId": "GetCommitmentByPaymentAddress",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/FeeEstimateResponse"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/btc/blocks/info": {
-			"get": {
-				"operationId": "GetInfo",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/btc/blocks/count": {
-			"get": {
-				"operationId": "GetCount",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/stacks/address/{stxAddress}/{cardinal}/{ordinal}": {
-			"get": {
-				"operationId": "FetchUserBalances",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/AddressObject"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "stxAddress",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "cardinal",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "ordinal",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/uasu-api/{network}/v1/sbtc/fee-estimate": {
-			"get": {
-				"operationId": "GetFeeEstimate",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/FeeEstimateResponse"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/sbtc/keys": {
-			"get": {
-				"operationId": "GetKeys",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/KeySet"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/sbtc/data": {
-			"get": {
-				"operationId": "FetchSbtcContractData",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/SbtcContractDataType"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/dlc/is-registered/{contractId}": {
-			"get": {
-				"operationId": "IsRegistered",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "boolean"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "contractId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/uasu-api/{network}/v1/dlc/process-events/dlc-manager": {
-			"get": {
-				"operationId": "JobReadCreateDLCEvents",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {},
-									"type": "array"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/dlc/attestor-id": {
-			"get": {
-				"operationId": "GetAttestorId",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"attestors": {
-											"type": "number",
-											"format": "double"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/CommitmentType"
+										},
+										{
+											"$ref": "#/components/schemas/CommitmentError"
 										}
-									},
-									"required": [
-										"attestors"
-									],
-									"type": "object"
+									]
 								}
 							}
 						}
 					}
 				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/dlc/protocol-wallet": {
-			"get": {
-				"operationId": "GetProtocolWallet",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"protocolWallet": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"protocolWallet"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/uasu-api/{network}/v1/dlc/attestor/{attestorId}": {
-			"get": {
-				"operationId": "GetAttestor",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
+				"description": "Fetches the commitment data for a payment address",
 				"security": [],
 				"parameters": [
 					{
 						"in": "path",
-						"name": "attestorId",
+						"name": "paymentAddress",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					}
 				]
+			}
+		},
+		"/revealer-api/v1/commitment/inscription": {
+			"post": {
+				"operationId": "SaveInscriptionCommitment",
+				"responses": {
+					"200": {
+						"description": "CommitmentResponse",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/CommitmentResponse"
+										},
+										{
+											"$ref": "#/components/schemas/CommitmentError"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Build and save the commitment data for a taproot inscription. Return the address for invoice.\nIf payFromAddress is provided also returns a payment psbt for the web wallet.",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CommitmentRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/commitment/sbtc-deposit": {
+			"post": {
+				"operationId": "SaveSBTCCommitment",
+				"responses": {
+					"200": {
+						"description": "CommitmentResponse",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/CommitmentResponse"
+										},
+										{
+											"$ref": "#/components/schemas/CommitmentError"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Build and save the commitment data for an sbtc deposit. Return the address for invoice.\nIf payFromAddress is provided also returns a payment psbt for the web wallet.",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CommitmentRequest"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

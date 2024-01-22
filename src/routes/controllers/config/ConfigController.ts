@@ -2,7 +2,7 @@ import { Get, Route } from "tsoa";
 import { getConfig } from '../../../lib/config.js';
 
 export interface IStringToStringDictionary { [key: string]: string|number|undefined; }
-@Route("/uasu-api/:network/v1/config")
+@Route("/revealer-api/v1/config")
 export class ConfigController {
   @Get("/")
   public getAllParam(): any {
@@ -13,8 +13,6 @@ export class ConfigController {
     //config.mongoUser = '*****'
     config.btcRpcPwd = '*****'
     config.btcRpcUser = '*****'
-    config.mailChimpApiKey = '*****'
-    config.mailChimpAudience = '*****'
     return config;
   }
 
@@ -26,7 +24,6 @@ export class ConfigController {
     }
     if (param && param.indexOf('btc') > -1) return '*****'
     if (param && param.indexOf('mongo') > -1) return '*****'
-    if (param && param.indexOf('mailChimp') > -1) return '*****'
     return myval;
   }
 }
