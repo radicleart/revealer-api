@@ -47,20 +47,24 @@ export type CommitmentType = {
 	status: number;
     created: number;
     updated: number;
+	paidFromAddress?: string|undefined;
     requestType: string;
-    btcTxid?: string;
     taprootScript: TaprootScriptType;
     vout0?: VoutI;
     vout?: VoutI;
+	commitTxId?: string;
 }
 
 export type CommitmentResponse = {
 	commitAddress: string;
 	paymentPsbt: string|undefined;
+	commitTxId?: string;
+	recipientStxPrincipal?: string|undefined;
+	inscriptionPayload?: string|undefined;
 }
 
 export type CommitmentError = {
-	code: string;
+	failed: boolean;
 	message: string;
 }
 

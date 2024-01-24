@@ -6,6 +6,29 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"CommitmentResponse": {
+				"properties": {
+					"inscriptionPayload": {
+						"type": "string"
+					},
+					"recipientStxPrincipal": {
+						"type": "string"
+					},
+					"commitTxId": {
+						"type": "string"
+					},
+					"paymentPsbt": {
+						"type": "string"
+					},
+					"commitAddress": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"commitAddress"
+				],
+				"type": "object"
+			},
 			"CommitmentRequest": {
 				"properties": {
 					"inscriptionPayload": {
@@ -155,6 +178,9 @@
 			},
 			"CommitmentType": {
 				"properties": {
+					"commitTxId": {
+						"type": "string"
+					},
 					"vout": {
 						"$ref": "#/components/schemas/VoutI"
 					},
@@ -164,10 +190,10 @@
 					"taprootScript": {
 						"$ref": "#/components/schemas/TaprootScriptType"
 					},
-					"btcTxid": {
+					"requestType": {
 						"type": "string"
 					},
-					"requestType": {
+					"paidFromAddress": {
 						"type": "string"
 					},
 					"updated": {
@@ -204,35 +230,6 @@
 					"status",
 					"network",
 					"commitmentRequest"
-				],
-				"type": "object"
-			},
-			"CommitmentError": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"code": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"message",
-					"code"
-				],
-				"type": "object"
-			},
-			"CommitmentResponse": {
-				"properties": {
-					"paymentPsbt": {
-						"type": "string"
-					},
-					"commitAddress": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"commitAddress"
 				],
 				"type": "object"
 			}
@@ -303,6 +300,43 @@
 				]
 			}
 		},
+		"/revealer-api/v1/commitment/pending/{originator}/{requestType}": {
+			"get": {
+				"operationId": "GetCommitmentsPendingByOriginator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CommitmentResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Fetches the commitment data for a payment address",
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "originator",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "requestType",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/revealer-api/v1/commitment/{paymentAddress}": {
 			"get": {
 				"operationId": "GetCommitmentByPaymentAddress",
@@ -312,20 +346,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/CommitmentType"
-										},
-										{
-											"$ref": "#/components/schemas/CommitmentError"
-										}
-									]
+									"$ref": "#/components/schemas/CommitmentType"
 								}
 							}
 						}
 					}
 				},
-				"description": "Fetches the commitment data for a payment address",
 				"security": [],
 				"parameters": [
 					{
@@ -348,14 +374,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/CommitmentResponse"
-										},
-										{
-											"$ref": "#/components/schemas/CommitmentError"
-										}
-									]
+									"$ref": "#/components/schemas/CommitmentResponse"
 								}
 							}
 						}
@@ -385,14 +404,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/CommitmentResponse"
-										},
-										{
-											"$ref": "#/components/schemas/CommitmentError"
-										}
-									]
+									"$ref": "#/components/schemas/CommitmentResponse"
 								}
 							}
 						}

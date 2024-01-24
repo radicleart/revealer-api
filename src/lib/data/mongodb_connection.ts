@@ -36,4 +36,5 @@ export async function connect() {
 	const database = client.db(getConfig().mongoDbName);
 	commitments = database.collection('commitments');
 	await commitments.createIndex({'taprootScript.address': 1}, { unique: true })
+	await commitments.createIndex({'originator': 1, 'commitTxId': 1, 'requestType': 1, 'status': 1}, { unique: true })
 }

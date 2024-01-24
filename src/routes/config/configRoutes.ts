@@ -1,4 +1,4 @@
-import { ConfigController } from "./controllers/config/ConfigController.js"
+import { ConfigController } from "./ConfigController.js"
 
 import express from 'express';
 const router = express.Router();

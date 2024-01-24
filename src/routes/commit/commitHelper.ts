@@ -86,13 +86,13 @@ export async function scanForPayments() {
 	for (const tx of txs) {
 	  //console.log('scanBridgeTransactions: tx: ', tx);
 	  for (const vout of tx.vout) {
-		const senderAddress = tx.vin[0]?.prevout?.scriptpubkey_address || undefined;
+		const paidFromAddress = tx.vin[0]?.prevout?.scriptpubkey_address || undefined;
 		//console.log('matchCommitmentIn: matching: ' + peginRequest.uiPayload.amountSats + ' to ' + vout.value)
 		if (peginRequest.taprootScript?.address === vout.scriptpubkey_address) {
 		  const up = {
 			tries:  (peginRequest.tries) ? peginRequest.tries + 1 : 1,
-			btcTxid: tx.txid,
-			senderAddress,
+			commitTxId: tx.txid,
+			paidFromAddress,
 			status: CommitmentStatus.PAID,
 			vout: vout
 		  }

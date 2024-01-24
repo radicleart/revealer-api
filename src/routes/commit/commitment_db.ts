@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { commitments } from '../../lib/data/mongodb_connection';
+import { CommitmentStatus } from '../../types/revealer_types';
   
 // Exchange Rates 
 export async function saveCommitment (commitment:any) {
@@ -28,6 +29,11 @@ export async function findCommitmentById(_id:string):Promise<any> {
 
 export async function findCommitmentByPaymentAddress(paymentAddress:string):Promise<any> {
 	const result = await commitments.findOne({"paymentAddress":paymentAddress});
+	return result;
+}
+
+export async function findCommitmentsPendingByOriginator(originator:string, requestType:string):Promise<any> {
+	const result = await commitments.findOne({"originator":originator, "status": CommitmentStatus.UNPAID, 'requestType': requestType});
 	return result;
 }
 

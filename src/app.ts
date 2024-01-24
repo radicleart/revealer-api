@@ -5,7 +5,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { connect } from './lib/data/mongodb_connection.js'
-import { configRoutes } from './routes/configRoutes.js'
+import { configRoutes } from './routes/config/configRoutes.js'
 import { commitRoutes } from './routes/commit/commitRoutes.js'
 import { createRequire } from 'node:module';
 const r = createRequire(import.meta.url);

@@ -4,9 +4,9 @@ let CONFIG= {} as ConfigI;
 
 const REGTEST_REMOTE_CONFIG = {
   mongoDbUrl: 'cluster0.ovgne2s.mongodb.net',
-  mongoDbName: 'uasu-db-stag',
-  mongoUser: 'staguasu1',
-  mongoPwd: 'vvDRivVCiuZd88SK',
+  mongoDbName: 'uasu-db-dev',
+  mongoUser: 'devuasu1',
+  mongoPwd: 'FTNM7QpjqMHph4k7',
   btcNode: '127.0.0.1:18332',
   btcRpcUser: 'devnet',
   btcRpcPwd: 'devnet',

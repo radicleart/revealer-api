@@ -2,7 +2,7 @@ import { Body, Get, Post, Route } from "tsoa";
 import { getConfig } from "../../lib/config.js";
 import { CommitmentType, CommitmentStatus, UTXO, CommitmentRequest, CommitmentResponse, RequestType, CommitmentError } from "../../types/revealer_types.js";
 import { getCommitPaymentPsbt, getCommitmentForInscription, getCommitmentForSbtcDeposit } from "./commitHelper.js";
-import { findCommitmentByPaymentAddress, saveCommitment } from "./commitment_db.js";
+import { findCommitmentByPaymentAddress, findCommitmentsPendingByOriginator, saveCommitment } from "./commitment_db.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns
@@ -16,14 +16,34 @@ export class CommitController {
    * @param paymentAddress 
    * @returns 
    */
-  @Get("/:paymentAddress")
-  public async getCommitmentByPaymentAddress(paymentAddress:string): Promise<CommitmentType|CommitmentError> {
+  @Get("/pending/:originator/:requestType")
+  public async getCommitmentsPendingByOriginator(originator:string, requestType:string): Promise<CommitmentResponse|undefined> {
     try {
-      const commitment = findCommitmentByPaymentAddress(paymentAddress);
+      const commitment:CommitmentType = await findCommitmentsPendingByOriginator(originator, requestType);
+      if (!commitment) return
+      let paymentPsbt;
+      if (commitment.commitmentRequest.payFromAddress) {
+        paymentPsbt = await getCommitPaymentPsbt(commitment.commitmentRequest.revealFee, commitment.taprootScript.address, commitment.commitmentRequest.payFromAddress);
+      }
+      return {
+        commitAddress: commitment.taprootScript.address,
+        paymentPsbt: paymentPsbt,
+        commitTxId: commitment.commitTxId,
+        recipientStxPrincipal: commitment.commitmentRequest.recipientStxPrincipal,
+        inscriptionPayload: commitment.commitmentRequest.inscriptionPayload
+      };
+    } catch(err) {
+      throw new Error(err.message);
+    }
+  }
+
+  @Get("/:paymentAddress")
+  public async getCommitmentByPaymentAddress(paymentAddress:string): Promise<CommitmentType|undefined> {
+    try {
+      const commitment = await findCommitmentByPaymentAddress(paymentAddress);
       return commitment;
     } catch(err) {
-      console.error('getCommitmentByPaymentAddress: ', err)
-      return { code: '101', message: err.message };
+      throw new Error(err.message);
     }
   }
 
@@ -34,7 +54,7 @@ export class CommitController {
    * @returns CommitmentResponse
    */
   @Post("/inscription")
-  public async saveInscriptionCommitment(@Body() commitmentRequest:CommitmentRequest): Promise<CommitmentResponse|CommitmentError> {
+  public async saveInscriptionCommitment(@Body() commitmentRequest:CommitmentRequest): Promise<CommitmentResponse> {
     try {
       const taprootScript = getCommitmentForInscription(commitmentRequest);
       const commitment:CommitmentType = {
@@ -49,12 +69,11 @@ export class CommitController {
       saveCommitment(commitment)
       let paymentPsbt
       if (commitmentRequest.payFromAddress) {
-        paymentPsbt = getCommitPaymentPsbt(commitmentRequest.revealFee, commitment.taprootScript.address, commitmentRequest.payFromAddress);
+        paymentPsbt = await getCommitPaymentPsbt(commitmentRequest.revealFee, commitment.taprootScript.address, commitmentRequest.payFromAddress);
       }
       return { paymentPsbt, commitAddress: commitment.taprootScript.address };
     } catch(err) {
-      console.error('getSBTCCommitment: ', err)
-      return { code: '101', message: err.message };
+      throw new Error(err.message);
     }
   }
 
@@ -65,7 +84,7 @@ export class CommitController {
    * @returns CommitmentResponse
    */
     @Post("/sbtc-deposit")
-    public async saveSBTCCommitment(@Body() commitmentRequest:CommitmentRequest): Promise<CommitmentResponse|CommitmentError> {
+    public async saveSBTCCommitment(@Body() commitmentRequest:CommitmentRequest): Promise<CommitmentResponse> {
       try {
         const taprootScript = getCommitmentForSbtcDeposit(commitmentRequest);
         const commitment:CommitmentType = {
@@ -85,8 +104,7 @@ export class CommitController {
         }
         return { paymentPsbt, commitAddress: commitment.taprootScript.address };
       } catch(err) {
-        console.error('getSBTCCommitment: ', err)
-        return { code: '101', message: err.message };
+        throw new Error(err.message);
       }
     }
   
