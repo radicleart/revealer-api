@@ -1,4 +1,15 @@
+import { Document } from "mongodb";
 import { VoutI } from "sbtc-bridge-lib";
+
+export enum RevealerTxTypes {
+	SBTC_DEPOSIT,
+	SBTC_WITHDRAWAL,
+}
+
+export enum RevealerTxModes {
+	OP_RETURN,
+	OP_DROP,
+}
 
 export enum CommitmentStatus {
 	UNPAID = 0,
@@ -29,14 +40,19 @@ export type ConfigI = {
 	btcSchnorrReveal: string; 
 	btcSchnorrReclaim: string; 
 	btcSchnorrOracle: string; 
-	host: string; 
-	port: number; 
+	host: string;
+	port: number;
 	walletPath: string; 
 	network: string; 
-	mode: string; 
+	stacksApi: string; 
+	stacksExplorerUrl: string;
+	bitcoinExplorerUrl: string; 
 	mempoolUrl: string; 
-	electrumUrl: string; 
-	blockCypherUrl: string; 
+	blockCypherUrl: string;
+	publicAppName: string;
+	publicAppVersion: string; 
+	sbtcContractId: string;
+	electrumUrl: string;
 };
     
 export type CommitmentType = {
@@ -92,6 +108,25 @@ export type PubKeySet = {
   export interface SignRequestI {
 	psbt: string;
 	inputs: Array<number>;
+  }
+
+  export interface RevealerTransaction extends Document {
+	txId: string;
+	psbt: string;
+	signed: boolean;
+	recipient: string;
+	amountSats: number;
+	confirmations: number;
+	created: number;
+	paymentPublicKey: string;
+	paymentAddress: string;
+	mode: RevealerTxModes;
+	type: RevealerTxTypes;
+}
+
+  export type PSBTHolder = {
+	hexPSBT:string;
+	b64PSBT:string;
   }
 
   export type TaprootScriptType = {

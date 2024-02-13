@@ -6,6 +6,185 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"AddressHiroObject": {
+				"properties": {
+					"non_fungible_tokens": {},
+					"fungible_tokens": {},
+					"stx": {
+						"properties": {
+							"burnchain_unlock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"burnchain_lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"locked": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_tx_id": {
+								"type": "string"
+							},
+							"total_received": {
+								"type": "number",
+								"format": "double"
+							},
+							"total_sent": {
+								"type": "number",
+								"format": "double"
+							},
+							"balance": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"burnchain_unlock_height",
+							"burnchain_lock_height",
+							"lock_height",
+							"locked",
+							"lock_tx_id",
+							"total_received",
+							"total_sent",
+							"balance"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"non_fungible_tokens",
+					"fungible_tokens",
+					"stx"
+				],
+				"type": "object"
+			},
+			"AddressMempoolObject": {
+				"properties": {
+					"mempool_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"chain_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"mempool_stats",
+					"chain_stats",
+					"address"
+				],
+				"type": "object"
+			},
+			"AddressObject": {
+				"properties": {
+					"btcPubkeySegwit1": {
+						"type": "string"
+					},
+					"btcPubkeySegwit0": {
+						"type": "string"
+					},
+					"ordinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"cardinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"stacksTokenInfo": {
+						"$ref": "#/components/schemas/AddressHiroObject"
+					},
+					"stxBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"sBTCBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"ordinal": {
+						"type": "string"
+					},
+					"cardinal": {
+						"type": "string"
+					},
+					"stxAddress": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"stxBalance",
+					"sBTCBalance",
+					"ordinal",
+					"cardinal",
+					"stxAddress"
+				],
+				"type": "object"
+			},
 			"CommitmentResponse": {
 				"properties": {
 					"inscriptionPayload": {
@@ -232,12 +411,96 @@
 					"commitmentRequest"
 				],
 				"type": "object"
+			},
+			"PSBTHolder": {
+				"properties": {
+					"b64PSBT": {
+						"type": "string"
+					},
+					"hexPSBT": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"b64PSBT",
+					"hexPSBT"
+				],
+				"type": "object"
+			},
+			"RevealerTxModes": {
+				"enum": [
+					0,
+					1
+				],
+				"type": "number"
+			},
+			"RevealerTxTypes": {
+				"enum": [
+					0,
+					1
+				],
+				"type": "number"
+			},
+			"RevealerTransaction": {
+				"properties": {
+					"txId": {
+						"type": "string"
+					},
+					"psbt": {
+						"type": "string"
+					},
+					"signed": {
+						"type": "boolean"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"paymentPublicKey": {
+						"type": "string"
+					},
+					"paymentAddress": {
+						"type": "string"
+					},
+					"mode": {
+						"$ref": "#/components/schemas/RevealerTxModes"
+					},
+					"type": {
+						"$ref": "#/components/schemas/RevealerTxTypes"
+					}
+				},
+				"required": [
+					"txId",
+					"psbt",
+					"signed",
+					"recipient",
+					"amountSats",
+					"confirmations",
+					"created",
+					"paymentPublicKey",
+					"paymentAddress",
+					"mode",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "uasu-api",
+		"title": "revealer-api",
 		"version": "1.0.0",
 		"description": "Proxy server for ordicall web application to access ordinals and bitcoin servers",
 		"license": {
@@ -247,9 +510,9 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/revealer-api/v1/config": {
+		"/revealer-api/v1/sbtc/init-ui": {
 			"get": {
-				"operationId": "GetAllParam",
+				"operationId": "InitUi",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -260,28 +523,21 @@
 						}
 					}
 				},
+				"description": "Fetch objects needed in the UI;\nThe object makes several contract calls and so is \ncached and refreshed every 3 minutes.\nreturns { \n\tkeys:KeySet;\n sbtcContractData:SbtcContractDataType;\n btcFeeRates:FeeEstimateResponse;\n rates:Array<ExchangeRate>\n}",
 				"security": [],
 				"parameters": []
 			}
 		},
-		"/revealer-api/v1/config/{param}": {
+		"/revealer-api/v1/sbtc/address/balances/{stxAddress}/{cardinal}/{ordinal}": {
 			"get": {
-				"operationId": "GetParam",
+				"operationId": "FetchUserBalances",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"type": "string"
-										},
-										{
-											"type": "number",
-											"format": "double"
-										}
-									]
+									"$ref": "#/components/schemas/AddressObject"
 								}
 							}
 						}
@@ -291,7 +547,23 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "param",
+						"name": "stxAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "cardinal",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "ordinal",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -419,6 +691,120 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/CommitmentRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/get-psbt-for-deposit/{recipient}/{amountSats}/{paymentPublicKey}/{paymentAddress}": {
+			"get": {
+				"operationId": "GetPsbtForDeposit",
+				"responses": {
+					"200": {
+						"description": "unsigned psbt",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PSBTHolder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
+				"security": [],
+				"parameters": [
+					{
+						"description": "stacks account or contract principle to receive sBTC",
+						"in": "path",
+						"name": "recipient",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "amount user wishes to deposit",
+						"in": "path",
+						"name": "amountSats",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "public key to spend utxos",
+						"in": "path",
+						"name": "paymentPublicKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "also used for change address to send deposit from",
+						"in": "path",
+						"name": "paymentAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/revealer-api/v1/op_return/broadcast-deposit": {
+			"post": {
+				"operationId": "SendRawTransaction",
+				"responses": {
+					"200": {
+						"description": "string",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RevealerTransaction"
+								}
+							}
+						}
+					}
+				},
+				"description": "Broadcast signed psbt / transaction. Note the recipient, amount and\npublic key are used to make a temporary unique id. Its possible the user \ncan broadcast the siged psbt outside the bridge but the default case is they\nsig ad broadcast from the bridge app - i which  case we replace the temporary\nunique id with the tx id of the finalised tx. This makes payment lookups a lot simpler",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"maxFeeRate": {
+										"type": "number",
+										"format": "double"
+									},
+									"hex": {
+										"type": "string"
+									},
+									"paymentPublicKey": {
+										"type": "string"
+									},
+									"amountSats": {
+										"type": "number",
+										"format": "double"
+									},
+									"recipient": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"maxFeeRate",
+									"hex",
+									"paymentPublicKey",
+									"amountSats",
+									"recipient"
+								],
+								"type": "object"
 							}
 						}
 					}

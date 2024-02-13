@@ -76,7 +76,7 @@ export async function scanForPayments() {
 		}
 	  }
 	} catch (err: any) {
-	  console.log('scanBridgeTransactions: requests: ', err)
+	  console.error('scanBridgeTransactions: requests: ', err)
 	}
 	  return { matched: matchCount };
   }

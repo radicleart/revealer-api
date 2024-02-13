@@ -220,7 +220,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "uasu-api",
+		"title": "revealer-api",
 		"version": "1.0.0",
 		"description": "Proxy server for ordicall web application to access ordinals and bitcoin servers",
 		"license": {
@@ -230,7 +230,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/uasu-api/{network}/v1/config": {
+		"/revealer-api/{network}/v1/config": {
 			"get": {
 				"operationId": "GetAllParam",
 				"responses": {
@@ -247,7 +247,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/config/{param}": {
+		"/revealer-api/{network}/v1/config/{param}": {
 			"get": {
 				"operationId": "GetParam",
 				"responses": {
@@ -283,7 +283,7 @@
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/address/{address}/txs": {
+		"/revealer-api/{network}/v1/btc/wallet/address/{address}/txs": {
 			"get": {
 				"operationId": "FetchAddressTransactions",
 				"responses": {
@@ -309,7 +309,7 @@
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/loadwallet/{name}": {
+		"/revealer-api/{network}/v1/btc/wallet/loadwallet/{name}": {
 			"get": {
 				"operationId": "LoadWallet",
 				"responses": {
@@ -335,7 +335,7 @@
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/listwallets": {
+		"/revealer-api/{network}/v1/btc/wallet/listwallets": {
 			"get": {
 				"operationId": "ListWallets",
 				"responses": {
@@ -352,7 +352,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/fee-estimate": {
+		"/revealer-api/{network}/v1/btc/blocks/fee-estimate": {
 			"get": {
 				"operationId": "GetFeeEstimate",
 				"responses": {
@@ -371,7 +371,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/info": {
+		"/revealer-api/{network}/v1/btc/blocks/info": {
 			"get": {
 				"operationId": "GetInfo",
 				"responses": {
@@ -388,7 +388,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/count": {
+		"/revealer-api/{network}/v1/btc/blocks/count": {
 			"get": {
 				"operationId": "GetCount",
 				"responses": {
@@ -405,7 +405,7 @@
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/stacks/address/{stxAddress}/{cardinal}/{ordinal}": {
+		"/revealer-api/{network}/v1/stacks/address/{stxAddress}/{cardinal}/{ordinal}": {
 			"get": {
 				"operationId": "FetchUserBalances",
 				"responses": {
@@ -449,7 +449,7 @@
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/dlc/is-registered/{contractId}": {
+		"/revealer-api/{network}/v1/dlc/is-registered/{contractId}": {
 			"get": {
 				"operationId": "IsRegistered",
 				"responses": {

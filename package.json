@@ -1,5 +1,5 @@
 {
-  "name": "uasu-api",
+  "name": "revealer-api",
   "version": "1.0.0",
   "description": "Proxy server for ordicall web application to access ordinals and bitcoin servers",
   "main": "dist/src/app.js",
@@ -14,8 +14,7 @@
     "coverage": "vitest run --coverage",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
-    "regtest-local":  "concurrently \"NODE_ENV=regtest-local    nodemon \" \"NODE_ENV=regtest-local  nodemon -x tsoa spec\"",
-    "regtest-remote": "concurrently \"NODE_ENV=regtest-remote   nodemon \" \"NODE_ENV=regtest-remote nodemon -x tsoa spec\"",
+    "lt": "concurrently \"NODE_ENV=local-testnet nodemon \" \"NODE_ENV=local-testnet nodemon -x tsoa spec\"",
     "swagger": "tsoa spec"
   },
   "nodemonConfig": {
@@ -62,12 +61,9 @@
     "body-parser": "^1.20.2",
     "c32check": "^2.0.0",
     "cors": "^2.8.5",
-    "decimal": "^0.0.2",
-    "decimal.js": "^10.4.3",
     "esm": "^3.2.25",
     "express": "^4.18.2",
     "jsontokens": "^4.0.1",
-    "micro-stacks": "^1.1.4",
     "mongodb": "^5.0.1",
     "mongoose": "^6.9.2",
     "morgan": "^1.10.0",
@@ -76,7 +72,6 @@
     "sbtc-bridge-lib": "^1.1.25",
     "swagger-ui-express": "^4.6.3",
     "tsoa": "^5.1.1",
-    "uninstall": "^0.0.0",
-    "ws": "^8.13.0"
+    "ws": "^8.16.0"
   }
 }

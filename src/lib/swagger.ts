@@ -126,7 +126,7 @@ export const swagger = {
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "uasu-api",
+		"title": "revealer-api",
 		"version": "1.0.0",
 		"description": "Enables caching of contract data for the Ordical app",
 		"license": {
@@ -136,7 +136,7 @@ export const swagger = {
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/uasu-api/{network}/v1/config": {
+		"/revealer-api/{network}/v1/config": {
 			"get": {
 				"operationId": "GetAllParam",
 				"responses": {
@@ -155,7 +155,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/config/{param}": {
+		"/revealer-api/{network}/v1/config/{param}": {
 			"get": {
 				"operationId": "GetParam",
 				"responses": {
@@ -183,7 +183,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/tx/{txid}": {
+		"/revealer-api/{network}/v1/btc/tx/{txid}": {
 			"get": {
 				"operationId": "FetchRawTransaction",
 				"responses": {
@@ -209,7 +209,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/address/{address}/utxos": {
+		"/revealer-api/{network}/v1/btc/wallet/address/{address}/utxos": {
 			"get": {
 				"operationId": "FetchUtxoSet",
 				"responses": {
@@ -235,7 +235,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/loadwallet/{name}": {
+		"/revealer-api/{network}/v1/btc/wallet/loadwallet/{name}": {
 			"get": {
 				"operationId": "LoadWallet",
 				"responses": {
@@ -261,7 +261,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/btc/wallet/listwallets": {
+		"/revealer-api/{network}/v1/btc/wallet/listwallets": {
 			"get": {
 				"operationId": "ListWallets",
 				"responses": {
@@ -278,7 +278,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/fee-estimate": {
+		"/revealer-api/{network}/v1/btc/blocks/fee-estimate": {
 			"get": {
 				"operationId": "GetFeeEstimate",
 				"responses": {
@@ -297,7 +297,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/info": {
+		"/revealer-api/{network}/v1/btc/blocks/info": {
 			"get": {
 				"operationId": "GetInfo",
 				"responses": {
@@ -314,7 +314,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/btc/blocks/count": {
+		"/revealer-api/{network}/v1/btc/blocks/count": {
 			"get": {
 				"operationId": "GetCount",
 				"responses": {
@@ -331,7 +331,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/sbtc/events": {
+		"/revealer-api/{network}/v1/sbtc/events": {
 			"get": {
 				"operationId": "FetchAllSbtcEvents",
 				"responses": {
@@ -348,7 +348,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/sbtc/events/{page}": {
+		"/revealer-api/{network}/v1/sbtc/events/{page}": {
 			"get": {
 				"operationId": "FetchSbtcEvents",
 				"responses": {
@@ -375,7 +375,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/sbtc/address/{address}/balance": {
+		"/revealer-api/{network}/v1/sbtc/address/{address}/balance": {
 			"get": {
 				"operationId": "FetchUserSbtcBalance",
 				"responses": {
@@ -403,7 +403,7 @@ export const swagger = {
 				]
 			}
 		},
-		"/uasu-api/{network}/v1/sbtc/data": {
+		"/revealer-api/{network}/v1/sbtc/data": {
 			"get": {
 				"operationId": "FetchSbtcContractData",
 				"responses": {
@@ -422,7 +422,7 @@ export const swagger = {
 				"parameters": []
 			}
 		},
-		"/uasu-api/{network}/v1/sbtc/wallet-address": {
+		"/revealer-api/{network}/v1/sbtc/wallet-address": {
 			"get": {
 				"operationId": "FetchSbtcWalletAddress",
 				"responses": {

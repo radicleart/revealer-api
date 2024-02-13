@@ -1,14 +1,14 @@
 import * as secp from '@noble/secp256k1';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
-import { getConfig } from './config';
-import { getNet } from './utils';
-import { UTXO } from '../types/revealer_types';
+import { getConfig } from './config.js';
+import { getNet } from './utils.js';
+import { UTXO } from '../types/revealer_types.js';
 
 const privKey = hex.decode('0101010101010101010101010101010101010101010101010101010101010101');
-const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
+export const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
 
-const OPTIONS = {
+export const OPTIONS = {
   method: "POST",
   headers: { 'content-type': 'text/plain' },
   body: '' 
@@ -16,6 +16,7 @@ const OPTIONS = {
 
 export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any> {
     let result:any = {};
+	/**
 	if (address) {
         try {
           result = await bitcoinCoreAddressInfo(address);
@@ -25,11 +26,13 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
           console.error('fetchUtxoSet: addressValidation: ' + address + ' : ' + err.message)
         }
     }
+	 */
     try {
       const utxos = await mempoolFetchUTXOs(address);
       for (let utxo of utxos) {
-        const tx = await fetchTransaction(utxo.txid, verbose);
-        utxo.tx = tx;
+		const res = await mempoolFetchTransaction(utxo.txid);
+		if (verbose) res.hex = await mempoolFetchTransactionHex(utxo.txid);
+		utxo.tx = res;
       }
       result.utxos = utxos
     } catch (err:any) {
@@ -39,7 +42,7 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
     return result;
 }
   
-export async function fetchTransaction(txid:string, verbose:boolean) {
+async function fetchTransaction(txid:string, verbose:boolean) {
 	let dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getrawtransaction","params":["${txid}", ${verbose}]}`;
 	OPTIONS.body = dataString; 
 	let res;
@@ -271,7 +274,7 @@ function redeemAndWitnessScriptAddInput (utxo:any, p2shObj:any, hexy:any) {
 	}
 }
 
-async function handleError (response:any, message:string) {
+export async function handleError (response:any, message:string) {
 	if (response?.status !== 200) {
 	  const result = await response.json();
 	  console.error('==========================================================================');

@@ -2,11 +2,14 @@ import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import type { Collection } from 'mongodb';
 import { getConfig } from '../config.js';
 
-export let commitments:Collection;
-  
+export let commitmentCollection:Collection;
+export let transactionCollection:Collection;
+export let exchangeRatesCollection:Collection;
+
 export async function connect() {
 	let uriPrefix:string = 'mongodb+srv'
-	if (getConfig().mode === 'regtest-remote') {
+	const environ = process.env.NODE_ENV;
+	if (environ && environ === 'local-devnet') {
 	  // SRV URIs have the additional security requirements on hostnames.
 	  // A FQDN is not required for development.
 	  uriPrefix = 'mongodb'
@@ -34,7 +37,14 @@ export async function connect() {
 	// Create references to the database and collection in order to run
 	// operations on them.
 	const database = client.db(getConfig().mongoDbName);
-	commitments = database.collection('commitments');
-	await commitments.createIndex({'taprootScript.address': 1}, { unique: true })
-	await commitments.createIndex({'originator': 1, 'commitTxId': 1, 'requestType': 1, 'status': 1}, { unique: true })
+	
+	commitmentCollection = database.collection('commitmentCollection');
+	await commitmentCollection.createIndex({'taprootScript.address': 1}, { unique: true })
+	await commitmentCollection.createIndex({'originator': 1, 'commitTxId': 1, 'requestType': 1, 'status': 1}, { unique: true })
+
+	exchangeRatesCollection = database.collection('exchangeRatesCollection');
+	await exchangeRatesCollection.createIndex({currency: 1}, { unique: true })
+
+	transactionCollection = database.collection('transactionCollection');
+	await transactionCollection.createIndex({txId: 1}, { unique: true })
 }
