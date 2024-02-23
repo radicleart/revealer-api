@@ -155,6 +155,7 @@
 					"cardinalInfo": {
 						"$ref": "#/components/schemas/AddressMempoolObject"
 					},
+					"bnsNameInfo": {},
 					"stacksTokenInfo": {
 						"$ref": "#/components/schemas/AddressHiroObject"
 					},
@@ -414,6 +415,10 @@
 			},
 			"PSBTHolder": {
 				"properties": {
+					"txFee": {
+						"type": "number",
+						"format": "double"
+					},
 					"b64PSBT": {
 						"type": "string"
 					},
@@ -422,6 +427,7 @@
 					}
 				},
 				"required": [
+					"txFee",
 					"b64PSBT",
 					"hexPSBT"
 				],
@@ -443,6 +449,9 @@
 			},
 			"RevealerTransaction": {
 				"properties": {
+					"_id": {
+						"type": "string"
+					},
 					"txId": {
 						"type": "string"
 					},
@@ -467,6 +476,13 @@
 						"type": "number",
 						"format": "double"
 					},
+					"updated": {
+						"type": "number",
+						"format": "double"
+					},
+					"signature": {
+						"type": "string"
+					},
 					"paymentPublicKey": {
 						"type": "string"
 					},
@@ -488,6 +504,7 @@
 					"amountSats",
 					"confirmations",
 					"created",
+					"updated",
 					"paymentPublicKey",
 					"paymentAddress",
 					"mode",
@@ -697,7 +714,7 @@
 				}
 			}
 		},
-		"/revealer-api/v1/op_return/get-psbt-for-deposit/{recipient}/{amountSats}/{paymentPublicKey}/{paymentAddress}": {
+		"/revealer-api/v1/op_return/get-psbt-for-deposit/{recipient}/{amountSats}/{paymentPublicKey}/{paymentAddress}/{feeMultiplier}": {
 			"get": {
 				"operationId": "GetPsbtForDeposit",
 				"responses": {
@@ -751,6 +768,90 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"in": "path",
+						"name": "feeMultiplier",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/revealer-api/v1/op_return/get-psbt-for-withdrawal/{withdrawalAddress}/{signature}/{amountSats}/{paymentPublicKey}/{paymentAddress}/{feeMultiplier}": {
+			"get": {
+				"operationId": "GetPsbtForWithdrawal",
+				"responses": {
+					"200": {
+						"description": "unsigned psbt",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PSBTHolder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
+				"security": [],
+				"parameters": [
+					{
+						"description": "bitcoin address to receive BTC",
+						"in": "path",
+						"name": "withdrawalAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "signature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "amount user wishes to deposit",
+						"in": "path",
+						"name": "amountSats",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "public key to spend utxos",
+						"in": "path",
+						"name": "paymentPublicKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "also used for change address to send deposit from",
+						"in": "path",
+						"name": "paymentAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "feeMultiplier",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
 					}
 				]
 			}
@@ -783,7 +884,7 @@
 										"type": "number",
 										"format": "double"
 									},
-									"hex": {
+									"signedPsbtHex": {
 										"type": "string"
 									},
 									"paymentPublicKey": {
@@ -799,10 +900,69 @@
 								},
 								"required": [
 									"maxFeeRate",
-									"hex",
+									"signedPsbtHex",
 									"paymentPublicKey",
 									"amountSats",
 									"recipient"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/client-broadcast-deposit": {
+			"post": {
+				"operationId": "ClientBroadcastDeposit",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RevealerTransaction"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"maxFeeRate": {
+										"type": "number",
+										"format": "double"
+									},
+									"signedPsbtHex": {
+										"type": "string"
+									},
+									"paymentPublicKey": {
+										"type": "string"
+									},
+									"amountSats": {
+										"type": "number",
+										"format": "double"
+									},
+									"recipient": {
+										"type": "string"
+									},
+									"txId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"maxFeeRate",
+									"signedPsbtHex",
+									"paymentPublicKey",
+									"amountSats",
+									"recipient",
+									"txId"
 								],
 								"type": "object"
 							}

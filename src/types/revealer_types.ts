@@ -110,7 +110,8 @@ export type PubKeySet = {
 	inputs: Array<number>;
   }
 
-  export interface RevealerTransaction extends Document {
+  export interface RevealerTransaction {
+	_id?: string;
 	txId: string;
 	psbt: string;
 	signed: boolean;
@@ -118,6 +119,8 @@ export type PubKeySet = {
 	amountSats: number;
 	confirmations: number;
 	created: number;
+	updated: number;
+	signature?: string;
 	paymentPublicKey: string;
 	paymentAddress: string;
 	mode: RevealerTxModes;
@@ -127,6 +130,7 @@ export type PubKeySet = {
   export type PSBTHolder = {
 	hexPSBT:string;
 	b64PSBT:string;
+	txFee:number;
   }
 
   export type TaprootScriptType = {

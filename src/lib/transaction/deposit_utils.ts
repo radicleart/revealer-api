@@ -10,6 +10,7 @@ import { UTXO } from '../../types/revealer_types.js';
 import { fetchUtxoSet } from '../bitcoin_utils.js';
 import { getConfig } from '../config.js';
 import { SbtcWalletController, cachedUIObject } from '../../routes/sbtc/SbtcWalletController.js';
+import { FeeEstimateResponse } from '../../types/sbtc_ui_types.js';
 
 
 const concat = P.concatBytes;
@@ -31,28 +32,37 @@ export const dust = 500;
  * - utxos the users utxos to spend from - from mempool/blockstream
  * @returns Transaction from @scure/btc-signer
  */
-export async function buildDepositTransaction(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string):Promise<Transaction> {
+export async function buildDepositTransaction(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number):Promise<{transaction:Transaction, txFee:number}> {
 	const network = getConfig().network
 	const net = getNet(getConfig().network);
 	const controller = new SbtcWalletController();
 	const cachedUIObject = await (controller.initUi())
 	const sbtcWalletPublicKey = cachedUIObject.sbtcContractData.sbtcWalletPublicKey
-	const fees = cachedUIObject.btcFeeRates;
-	const utxos:Array<UTXO> = (await fetchUtxoSet(paymentAddress, true)).utxos
+	const fees:FeeEstimateResponse = cachedUIObject.btcFeeRates;
+	let utxos:Array<UTXO> = []
+	try {
+		utxos = (await fetchUtxoSet(paymentAddress, true)).utxos
+	} catch (err:any) {
+		console.error('=============================================================== ')
+		console.error('buildDepositTransaction: Error fetching utxos: address: ' + paymentAddress)
+		console.error('buildDepositTransaction: Error fetching utxos: ' + err.message)
+		console.error('=============================================================== ')
+		throw new Error('Unable to lookup UTXOs for address this could be a network failure or rate limiting by remote service: ' + paymentAddress)
+	}
 	//console.log('buildDepositTransaction: utxos:', utxos)
 
 	const sbtcWalletAddress = getPegWalletAddressFromPublicKey(network, sbtcWalletPublicKey)
 	const data = buildDepositPayload(network, recipient);
 
-	const txFees = calculateDepositFees(network, false, amountSats, fees.feeInfo, utxos, sbtcWalletAddress!, hex.decode(data))
-	const tx = new btc.Transaction({ allowUnknowInput: true, allowUnknowOutput: true, allowUnknownInputs:true, allowUnknownOutputs:true });
+	const transaction = new btc.Transaction({ allowUnknowInput: true, allowUnknowOutput: true, allowUnknownInputs:true, allowUnknownOutputs:true });
+	const txFee = estimateActualFee(transaction, fees.feeInfo) * feeMultiplier
 	// no reveal fee for op_return
-	addInputs(network, amountSats, 0, tx, false, utxos, paymentPublicKey);
-	tx.addOutput({ script: btc.Script.encode(['RETURN', hex.decode(data)]), amount: BigInt(0) });
-	tx.addOutputAddress(sbtcWalletAddress!, BigInt(amountSats), net);
-	const changeAmount = inputAmt(tx) - (amountSats + txFees[1]); 
-	if (changeAmount > 0) tx.addOutputAddress(paymentAddress, BigInt(changeAmount), net);
-	return tx;
+	addInputs(network, amountSats, txFee, transaction, false, utxos, paymentPublicKey);
+	transaction.addOutput({ script: btc.Script.encode(['RETURN', hex.decode(data)]), amount: BigInt(0) });
+	transaction.addOutputAddress(sbtcWalletAddress!, BigInt(amountSats), net);
+	const changeAmount = inputAmt(transaction) - (amountSats + txFee); 
+	if (changeAmount > 0) transaction.addOutputAddress(paymentAddress, BigInt(changeAmount), net);
+	return { transaction, txFee};
 }
 
 export function getBridgeDeposit(network:string, uiPayload:DepositPayloadUIType, originator:string):BridgeTransactionType {
@@ -75,6 +85,21 @@ export function maxCommit(addressInfo:any) {
 	return summ || 0;
 }
 
+export function estimateActualFee (tx:btc.Transaction, feeInfo:any):number {
+	try {
+		const vsize = tx.vsize;
+		const fees = [
+			Math.floor(vsize * feeInfo['low_fee_per_kb'] / 1024),
+			Math.floor(vsize * feeInfo['medium_fee_per_kb'] / 1024),
+			Math.floor(vsize * feeInfo['high_fee_per_kb'] / 1024),
+		]
+		return fees[1];
+	} catch (err:any) {
+		return 10000
+	}
+}
+
+/**
 function calculateDepositFees (network:string, opDrop:boolean, amount:number, feeInfo:any, utxos:Array<UTXO>, commitTxScriptAddress:string, data:Uint8Array|undefined) {
 	try {
 		const net = getNet(network);
@@ -102,3 +127,4 @@ function calculateDepositFees (network:string, opDrop:boolean, amount:number, fe
 		return [ 850, 1000, 1150]
 	}
 }
+ */

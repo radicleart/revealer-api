@@ -176,9 +176,9 @@ export function addInputs (network:string, amount:number, revealPayment:number, 
 	}
 }
  */
-export function addInputs (network:string, amount:number, revealPayment:number, transaction:btc.Transaction, feeCalc:boolean, utxos:Array<UTXO>, paymentPublicKey:string) {
+export function addInputs (network:string, amount:number, txFee:number, transaction:btc.Transaction, feeCalc:boolean, utxos:Array<UTXO>, paymentPublicKey:string) {
 	const net = getNet(network);
-	const bar = revealPayment + amount;
+	const bar = txFee + amount;
 	let amt = 0;
 	for (const utxo of utxos) {
 		const hexy = (utxo.tx.hex) ? utxo.tx.hex : utxo.tx

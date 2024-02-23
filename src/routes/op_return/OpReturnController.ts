@@ -2,11 +2,10 @@ import { Body, Get, Post, Route } from "tsoa";
 import { buildDepositTransaction } from "../../lib/transaction/deposit_utils.js";
 import { hex, base64 } from '@scure/base';
 import * as btc from '@scure/btc-signer';
-import { getNet } from "../../lib/utils.js";
-import { getConfig } from "../../lib/config.js";
 import { PSBTHolder, RevealerTransaction, RevealerTxModes, RevealerTxTypes } from "../../types/revealer_types.js";
-import { sendRawTxDirectBlockCypher, sendRawTxDirectMempool, sendRawTxRpc } from "../../lib/broadcast_utils.js";
-import { findTransactionByTxId, saveTransaction, updateTransaction } from "./transaction_db.js";
+import { broadcastBitcoinTransaction } from "../../lib/broadcast_utils.js";
+import { findTransactionByTxId, saveTransaction, updateDeposit, updateDepositForSuccessfulBroadcast, updateTransaction } from "./transaction_db.js";
+import { buildWithdrawalTransaction } from "../../lib/transaction/withdraw_utils.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns
@@ -22,18 +21,20 @@ export class OpReturnController {
    * @param paymentAddress also used for change address to send deposit from
    * @returns unsigned psbt
    */
-  @Get("/get-psbt-for-deposit/:recipient/:amountSats/:paymentPublicKey/:paymentAddress")
-  public async getPsbtForDeposit(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string): Promise<PSBTHolder|undefined> {
+  @Get("/get-psbt-for-deposit/:recipient/:amountSats/:paymentPublicKey/:paymentAddress/:feeMultiplier")
+  public async getPsbtForDeposit(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number): Promise<PSBTHolder|undefined> {
     try {
-      const transaction = await buildDepositTransaction(recipient, amountSats, paymentPublicKey, paymentAddress)
+      const {transaction, txFee} = await buildDepositTransaction(recipient, amountSats, paymentPublicKey, paymentAddress, feeMultiplier)
       if (!transaction) return
       const psbts = {
         hexPSBT: hex.encode(transaction.toPSBT()),
-        b64PSBT: base64.encode(transaction.toPSBT())
+        b64PSBT: base64.encode(transaction.toPSBT()),
+        txFee
       }
-      console.log('getPsbtForDeposit: ', psbts)
+      const txId = recipient + ':' + amountSats + ':' + paymentPublicKey
+      const created = (new Date()).getTime()
       const revealerTx:RevealerTransaction = {
-        txId: recipient + ':' + amountSats + ':' + paymentPublicKey,
+        txId,
         psbt: psbts.hexPSBT,
         signed: false,
         recipient, 
@@ -43,9 +44,73 @@ export class OpReturnController {
         paymentAddress,
         mode: RevealerTxModes.OP_RETURN,
         type: RevealerTxTypes.SBTC_DEPOSIT,
-        created: (new Date()).getTime()
+        created,
+        updated: created
       }
-      await saveTransaction(revealerTx)
+      try {
+        await saveTransaction(revealerTx)
+      } catch (err:any) {
+        // non unique key - means the user clicked went back and clicked again
+        const tx = await findTransactionByTxId(txId)
+        console.log('getPsbtForDeposit: updating ephemeral tx: ' + revealerTx.txId)
+        revealerTx.created = tx.created
+        revealerTx.psbt = psbts.hexPSBT
+        revealerTx._id = tx._id;
+        await updateTransaction(tx.txId, revealerTx) 
+      }
+      return psbts
+    } catch(err) {
+      console.error('getPsbtForDeposit: ', err)
+      throw new Error(err.message);
+    }
+  }
+
+  /**
+   * Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.
+   * @param withdrawalAddress bitcoin address to receive BTC 
+   * @param amountSats amount user wishes to deposit 
+   * @param paymentPublicKey public key to spend utxos
+   * @param paymentAddress also used for change address to send deposit from
+   * @returns unsigned psbt
+   */
+  @Get("/get-psbt-for-withdrawal/:withdrawalAddress/:signature/:amountSats/:paymentPublicKey/:paymentAddress/:feeMultiplier")
+  public async getPsbtForWithdrawal(withdrawalAddress:string, signature:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number): Promise<PSBTHolder|undefined> {
+    try {
+      const {transaction, txFee} = await buildWithdrawalTransaction(withdrawalAddress, signature, amountSats, paymentPublicKey, paymentAddress, feeMultiplier)
+      if (!transaction) return
+      const psbts = {
+        hexPSBT: hex.encode(transaction.toPSBT()),
+        b64PSBT: base64.encode(transaction.toPSBT()),
+        txFee
+      }
+      const txId = withdrawalAddress + ':' + amountSats + ':' + paymentPublicKey
+      const created = (new Date()).getTime()
+      const revealerTx:RevealerTransaction = {
+        txId,
+        psbt: psbts.hexPSBT,
+        signed: false,
+        recipient: withdrawalAddress, 
+        amountSats,
+        confirmations: -1,
+        paymentPublicKey,
+        paymentAddress,
+        signature,
+        mode: RevealerTxModes.OP_RETURN,
+        type: RevealerTxTypes.SBTC_WITHDRAWAL,
+        created,
+        updated: created
+      }
+      try {
+        await saveTransaction(revealerTx)
+      } catch (err:any) {
+        // non unique key - means the user clicked went back and clicked again
+        const tx = await findTransactionByTxId(txId)
+        console.log('getPsbtForDeposit: updating ephemeral tx: ' + revealerTx.txId)
+        revealerTx.created = tx.created
+        revealerTx.psbt = psbts.hexPSBT
+        revealerTx._id = tx._id;
+        await updateTransaction(tx.txId, revealerTx)
+      }
       return psbts
     } catch(err) {
       console.error('getPsbtForDeposit: ', err)
@@ -67,40 +132,26 @@ export class OpReturnController {
    * @returns string 
    */
   @Post("/broadcast-deposit")
-  public async sendRawTransaction(@Body() tx: {recipient:string, amountSats:number, paymentPublicKey:string, hex:string, maxFeeRate:number}): Promise<RevealerTransaction> {
-    const inTx = btc.Transaction.fromRaw(hex.decode(tx.hex), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
-    const revealerTx = await findTransactionByTxId(tx.recipient + ':' + tx.amountSats + ':' + tx.paymentPublicKey) as RevealerTransaction;
-    if (!revealerTx) throw Error('Expecting tx to broadcast to be known to api')
+  public async sendRawTransaction(@Body() tx: {recipient:string, amountSats:number, paymentPublicKey:string, signedPsbtHex:string, maxFeeRate:number}): Promise<RevealerTransaction> {
     try {
-      const resp =  await sendRawTxRpc(tx.hex, tx.maxFeeRate);
-      if (resp && resp.error && resp.error.code) {
-        if (resp.error.code === -27) { // Transaction already in block chain
-          return resp;
-        }
-        console.log('sendRawTransaction:sendRawTxRpc: ', resp)
-        throw new Error('Local rpc call failed.. try external service')
-      }
-      console.log('sendRawTransaction 1: bitcoin core:', resp);
-    } catch (err) {
-
-      try {
-        console.log('sendRawTransaction 2: rpc error: ', err);
-        console.log('sendRawTransaction 2: trying mempool: ');
-        const resp = await sendRawTxDirectMempool(tx.hex);
-        console.log('sendRawTransaction 2: sendRawTxDirectMempool: ', resp);
-      } catch (err) {
-        try {
-          console.log('sendRawTransaction 3: mempool error: ', err);
-          const resp = await sendRawTxDirectBlockCypher(tx.hex);
-          console.log('sendRawTransaction 3: sendRawTxDirectBlockCypher: ', resp);
-        } catch (err:any) {
-          throw new Error('Unable to broadcast this transaction: ' + revealerTx.txId)
-        }
-      }
-      await updateTransaction(revealerTx, {txId: inTx.id, confirmations:0, signed:true});
-      return revealerTx;
+      const inTx = btc.Transaction.fromRaw(hex.decode(tx.signedPsbtHex), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
+      let revealerTx = await findTransactionByTxId(tx.recipient + ':' + tx.amountSats + ':' + tx.paymentPublicKey) as RevealerTransaction;
+      if (!revealerTx) throw Error('Expecting tx to broadcast to be known to api');
+      console.log('sendRawTransaction: tx: ', tx)
+      const resp = await broadcastBitcoinTransaction(tx.signedPsbtHex, tx.maxFeeRate)
+      console.log('sendRawTransaction: broadcast response: ', resp)
+      await updateDeposit(inTx.id, revealerTx.txId, tx.signedPsbtHex)
+      return await updateDepositForSuccessfulBroadcast(inTx.id)
+    } catch (err:any) {
+      console.log('sendRawTransaction: error: ' + err.message)
+      throw new Error('Broadcast error: ' + err.message)
     }
   }
 
-  
+  @Post("/client-broadcast-deposit")
+  public async clientBroadcastDeposit(@Body() tx: {txId:string, recipient:string, amountSats:number, paymentPublicKey:string, signedPsbtHex:string, maxFeeRate:number}): Promise<RevealerTransaction> {
+    const oldTxId = tx.recipient + ':' + tx.amountSats + ':' + tx.paymentPublicKey
+    await updateDeposit(tx.txId, oldTxId, tx.signedPsbtHex)
+    return await updateDepositForSuccessfulBroadcast(tx.txId)
+  }
 }

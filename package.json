@@ -69,7 +69,7 @@
     "morgan": "^1.10.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^2.6.9",
-    "sbtc-bridge-lib": "^1.1.25",
+    "sbtc-bridge-lib": "^1.1.27",
     "swagger-ui-express": "^4.6.3",
     "tsoa": "^5.1.1",
     "ws": "^8.16.0"

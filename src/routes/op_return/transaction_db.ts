@@ -1,16 +1,46 @@
-import { ObjectId, OptionalId, OptionalUnlessRequiredId } from 'mongodb';
 import { transactionCollection } from '../../lib/data/mongodb_connection';
 import { RevealerTransaction } from '../../types/revealer_types';
-  
-// Exchange Rates 
-export async function saveTransaction (revealerTx:OptionalId<RevealerTransaction>) {
+
+
+export async function updateDeposit(newTxId:string, oldTxId:string, signedPsbtHex?:string): Promise<RevealerTransaction> {
+  try {
+    await updateTransaction(oldTxId, {
+      txId: newTxId,
+      psbt: signedPsbtHex, 
+      confirmations:-1, 
+      signed:true, 
+      updated: new Date().getTime()
+    });
+    const revealerTx = await findTransactionByTxId(newTxId) as RevealerTransaction;
+    return revealerTx;
+  } catch (err:any) {
+    console.error('updateDeposit: error: ', err)
+    throw new Error('Broadcast error: ' + err.message)
+  }
+}
+
+export async function updateDepositForSuccessfulBroadcast(txId:string): Promise<RevealerTransaction> {
+  try {
+    await updateTransaction(txId, {
+      confirmations:0, 
+      updated: new Date().getTime()
+    });
+    const revealerTx = await findTransactionByTxId(txId) as RevealerTransaction;
+    return revealerTx;
+  } catch (err:any) {
+    console.error('updateDeposit: error: ', err)
+    throw new Error('Broadcast error: ' + err.message)
+  }
+}
+
+export async function saveTransaction (revealerTx:any) {
 	const result = await transactionCollection.insertOne(revealerTx);
 	return result;
 }
 
-export async function updateTransaction (revealerTx:RevealerTransaction, changes: any) {
+export async function updateTransaction (txId:string, changes: any) {
 	const result = await transactionCollection.updateOne({
-		_id: revealerTx._id
+		txId
 	},
     { $set: changes});
 	return result;

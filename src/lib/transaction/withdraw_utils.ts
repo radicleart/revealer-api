@@ -7,6 +7,11 @@ import { buildWithdrawPayload, amountToBigUint64, bigUint64ToAmount } from './pa
 import { addInputs, getNet, getPegWalletAddressFromPublicKey, inputAmt, toXOnly } from './wallet_utils.js';
 import { BridgeTransactionType, WithdrawPayloadUIType } from 'sbtc-bridge-lib';
 import { UTXO } from '../../types/revealer_types.js';
+import { getConfig } from '../config.js';
+import { SbtcWalletController } from '../../routes/sbtc/SbtcWalletController.js';
+import { estimateActualFee } from './deposit_utils.js';
+import { FeeEstimateResponse } from '../../types/sbtc_ui_types.js';
+import { fetchUtxoSet } from '../bitcoin_utils.js';
 
 const concat = P.concatBytes;
 
@@ -18,11 +23,42 @@ export const dust = 500
 /**
  * 
  * @param network 
- * @param uiPayload 
+ * @param uiPayload
  * @param utxos:Array<UTXO>
  * @param btcFeeRates 
  * @returns Transaction from @scure/btc-signer
  */
+export async function buildWithdrawalTransaction(withdrawalAddress:string, signature:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number) {
+	const network = getConfig().network
+	const net = getNet(getConfig().network);
+	const controller = new SbtcWalletController();
+	const cachedUIObject = await (controller.initUi())
+	const sbtcWalletPublicKey = cachedUIObject.sbtcContractData.sbtcWalletPublicKey
+	const fees:FeeEstimateResponse = cachedUIObject.btcFeeRates;
+	let utxos:Array<UTXO> = []
+	try {
+		utxos = (await fetchUtxoSet(paymentAddress, true)).utxos
+	} catch (err:any) {
+		console.error('=============================================================== ')
+		console.error('buildWithdrawTransaction: Error fetching utxos: address: ' + paymentAddress)
+		console.error('buildWithdrawTransaction: Error fetching utxos: ' + err.message)
+		console.error('=============================================================== ')
+		throw new Error('Unable to lookup UTXOs for address this could be a network failure or rate limiting by remote service: ' + paymentAddress)
+	}
+	const sbtcWalletAddress = getPegWalletAddressFromPublicKey(network, sbtcWalletPublicKey)
+	const data = buildData(network, amountSats, signature, false)
+	const tx = new btc.Transaction({ allowUnknowOutput: true, allowUnknownInputs:true, allowUnknownOutputs:true });
+	const txFee = estimateActualFee(tx, fees.feeInfo) * feeMultiplier
+	addInputs(network, amountSats, 0, tx, false, utxos, paymentPublicKey);
+	tx.addOutput({ script: btc.Script.encode(['RETURN', hex.decode(data)]), amount: BigInt(0) });
+	const change = inputAmt(tx) - (fullfillmentFee + dust + txFee);
+	tx.addOutputAddress(withdrawalAddress, BigInt(dust), net);
+	tx.addOutputAddress(sbtcWalletAddress!, BigInt(fullfillmentFee), net);
+	if (change > 0) tx.addOutputAddress(paymentAddress, BigInt(change), net);
+	return { transaction: tx, txFee };
+}
+
+/**
 export function buildWithdrawTransaction(network:string, sbtcWalletPublicKey:string, uiPayload:WithdrawPayloadUIType, utxos:Array<UTXO>, btcFeeRates:any) {
 	if (!uiPayload.signature) throw new Error('Signature of output 2 scriptPubKey is required');
 	const net = getNet(network);
@@ -38,7 +74,7 @@ export function buildWithdrawTransaction(network:string, sbtcWalletPublicKey:str
 	if (change > 0) tx.addOutputAddress(uiPayload.bitcoinAddress, BigInt(change), net);
 	return tx;
 }
-
+ */
 /**
  * 
  * @param network 
