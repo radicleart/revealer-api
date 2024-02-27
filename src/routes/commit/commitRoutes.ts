@@ -29,16 +29,6 @@ router.get("/:paymentAddress", async (req, res, next) => {
   }
 });
 
-router.post("/sbtc-deposit", async (req, res, next) => {
-  try {
-    const commitRequest:CommitmentRequest = req.body;
-    const response = await controller.saveSBTCCommitment(commitRequest);
-    return res.send(response);
-  } catch (error) {
-    return res.status(500).send({failed: true, message: error.message})
-  }
-});
-
 router.post("/inscription", async (req, res, next) => {
   try {
     const commitRequest:CommitmentRequest = req.body;

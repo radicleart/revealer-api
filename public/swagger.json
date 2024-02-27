@@ -6,6 +6,186 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"AddressHiroObject": {
+				"properties": {
+					"non_fungible_tokens": {},
+					"fungible_tokens": {},
+					"stx": {
+						"properties": {
+							"burnchain_unlock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"burnchain_lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_height": {
+								"type": "number",
+								"format": "double"
+							},
+							"locked": {
+								"type": "number",
+								"format": "double"
+							},
+							"lock_tx_id": {
+								"type": "string"
+							},
+							"total_received": {
+								"type": "number",
+								"format": "double"
+							},
+							"total_sent": {
+								"type": "number",
+								"format": "double"
+							},
+							"balance": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"burnchain_unlock_height",
+							"burnchain_lock_height",
+							"lock_height",
+							"locked",
+							"lock_tx_id",
+							"total_received",
+							"total_sent",
+							"balance"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"non_fungible_tokens",
+					"fungible_tokens",
+					"stx"
+				],
+				"type": "object"
+			},
+			"AddressMempoolObject": {
+				"properties": {
+					"mempool_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"chain_stats": {
+						"properties": {
+							"tx_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"spent_txo_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_sum": {
+								"type": "number",
+								"format": "double"
+							},
+							"funded_txo_count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"tx_count",
+							"spent_txo_sum",
+							"spent_txo_count",
+							"funded_txo_sum",
+							"funded_txo_count"
+						],
+						"type": "object"
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"mempool_stats",
+					"chain_stats",
+					"address"
+				],
+				"type": "object"
+			},
+			"AddressObject": {
+				"properties": {
+					"btcPubkeySegwit1": {
+						"type": "string"
+					},
+					"btcPubkeySegwit0": {
+						"type": "string"
+					},
+					"ordinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"cardinalInfo": {
+						"$ref": "#/components/schemas/AddressMempoolObject"
+					},
+					"bnsNameInfo": {},
+					"stacksTokenInfo": {
+						"$ref": "#/components/schemas/AddressHiroObject"
+					},
+					"stxBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"sBTCBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"ordinal": {
+						"type": "string"
+					},
+					"cardinal": {
+						"type": "string"
+					},
+					"stxAddress": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"stxBalance",
+					"sBTCBalance",
+					"ordinal",
+					"cardinal",
+					"stxAddress"
+				],
+				"type": "object"
+			},
 			"CommitmentResponse": {
 				"properties": {
 					"inscriptionPayload": {
@@ -205,8 +385,7 @@
 						"format": "double"
 					},
 					"status": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					},
 					"network": {
 						"type": "string"
@@ -232,12 +411,261 @@
 					"commitmentRequest"
 				],
 				"type": "object"
+			},
+			"OpDropRequest": {
+				"properties": {
+					"paymentAddress": {
+						"type": "string"
+					},
+					"reclaimPublicKey": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"paymentAddress",
+					"reclaimPublicKey",
+					"amountSats",
+					"recipient",
+					"originator"
+				],
+				"type": "object"
+			},
+			"PSBTHolder": {
+				"properties": {
+					"txFee": {
+						"type": "number",
+						"format": "double"
+					},
+					"b64PSBT": {
+						"type": "string"
+					},
+					"hexPSBT": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"txFee",
+					"b64PSBT",
+					"hexPSBT"
+				],
+				"type": "object"
+			},
+			"OpReturnRequest": {
+				"properties": {
+					"feeMultiplier": {
+						"type": "number",
+						"format": "double"
+					},
+					"paymentAddress": {
+						"type": "string"
+					},
+					"paymentPublicKey": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"signature": {
+						"type": "string"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"feeMultiplier",
+					"paymentAddress",
+					"paymentPublicKey",
+					"amountSats",
+					"recipient",
+					"originator"
+				],
+				"type": "object"
+			},
+			"CommitmentScriptDataType": {
+				"properties": {
+					"tweakedPubkey": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"tapMerkleRoot": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"tapLeafScript": {},
+					"tapInternalKey": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"leaves": {},
+					"wsh": {
+						"type": "string"
+					},
+					"witnessScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"redeemScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"paymentType": {
+						"type": "string"
+					},
+					"script": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"paymentType"
+				],
+				"type": "object"
+			},
+			"RevealerTxModes": {
+				"enum": [
+					"OP_RETURN",
+					"OP_DROP"
+				],
+				"type": "string"
+			},
+			"RevealerTxTypes": {
+				"enum": [
+					"SBTC_DEPOSIT",
+					"SBTC_WITHDRAWAL"
+				],
+				"type": "string"
+			},
+			"RevealerTransaction": {
+				"properties": {
+					"_id": {
+						"type": "string"
+					},
+					"txId": {
+						"type": "string"
+					},
+					"psbt": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					},
+					"commitment": {
+						"$ref": "#/components/schemas/CommitmentScriptDataType"
+					},
+					"signed": {
+						"type": "boolean"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"updated": {
+						"type": "number",
+						"format": "double"
+					},
+					"signature": {
+						"type": "string"
+					},
+					"paymentPublicKey": {
+						"type": "string"
+					},
+					"paymentAddress": {
+						"type": "string"
+					},
+					"mode": {
+						"$ref": "#/components/schemas/RevealerTxModes"
+					},
+					"type": {
+						"$ref": "#/components/schemas/RevealerTxTypes"
+					}
+				},
+				"required": [
+					"txId",
+					"originator",
+					"signed",
+					"recipient",
+					"amountSats",
+					"confirmations",
+					"created",
+					"updated",
+					"paymentPublicKey",
+					"paymentAddress",
+					"mode",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "uasu-api",
+		"title": "revealer-api",
 		"version": "1.0.0",
 		"description": "Proxy server for ordicall web application to access ordinals and bitcoin servers",
 		"license": {
@@ -247,9 +675,9 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/revealer-api/v1/config": {
+		"/revealer-api/v1/sbtc/init-ui": {
 			"get": {
-				"operationId": "GetAllParam",
+				"operationId": "InitUi",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -260,28 +688,21 @@
 						}
 					}
 				},
+				"description": "Fetch objects needed in the UI;\nThe object makes several contract calls and so is \ncached and refreshed every 3 minutes.\nreturns { \n\tkeys:KeySet;\n sbtcContractData:SbtcContractDataType;\n btcFeeRates:FeeEstimateResponse;\n rates:Array<ExchangeRate>\n}",
 				"security": [],
 				"parameters": []
 			}
 		},
-		"/revealer-api/v1/config/{param}": {
+		"/revealer-api/v1/sbtc/address/balances/{stxAddress}/{cardinal}/{ordinal}": {
 			"get": {
-				"operationId": "GetParam",
+				"operationId": "FetchUserBalances",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"type": "string"
-										},
-										{
-											"type": "number",
-											"format": "double"
-										}
-									]
+									"$ref": "#/components/schemas/AddressObject"
 								}
 							}
 						}
@@ -291,7 +712,23 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "param",
+						"name": "stxAddress",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "cardinal",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "ordinal",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -395,22 +832,22 @@
 				}
 			}
 		},
-		"/revealer-api/v1/commitment/sbtc-deposit": {
+		"/revealer-api/v1/op_drop/get-commitment-address": {
 			"post": {
-				"operationId": "SaveSBTCCommitment",
+				"operationId": "GetCommitmentAddress",
 				"responses": {
 					"200": {
-						"description": "CommitmentResponse",
+						"description": "unsigned psbt",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/CommitmentResponse"
+									"type": "string"
 								}
 							}
 						}
 					}
 				},
-				"description": "Build and save the commitment data for an sbtc deposit. Return the address for invoice.\nIf payFromAddress is provided also returns a payment psbt for the web wallet.",
+				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -418,7 +855,182 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CommitmentRequest"
+								"$ref": "#/components/schemas/OpDropRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/get-psbt-for-deposit": {
+			"post": {
+				"operationId": "GetPsbtForDeposit",
+				"responses": {
+					"200": {
+						"description": "unsigned psbt",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PSBTHolder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpReturnRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/get-psbt-for-withdrawal": {
+			"post": {
+				"operationId": "GetPsbtForWithdrawal",
+				"responses": {
+					"200": {
+						"description": "unsigned psbt",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PSBTHolder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Build an sBTC withdrawal PSBT using OP_RETURN for the user to sign and sed.",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpReturnRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/broadcast-deposit": {
+			"post": {
+				"operationId": "SendRawTransaction",
+				"responses": {
+					"200": {
+						"description": "string",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RevealerTransaction"
+								}
+							}
+						}
+					}
+				},
+				"description": "Broadcast signed psbt / transaction. Note the recipient, amount and\npublic key are used to make a temporary unique id. Its possible the user \ncan broadcast the siged psbt outside the bridge but the default case is they\nsig ad broadcast from the bridge app - i which  case we replace the temporary\nunique id with the tx id of the finalised tx. This makes payment lookups a lot simpler",
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"maxFeeRate": {
+										"type": "number",
+										"format": "double"
+									},
+									"signedPsbtHex": {
+										"type": "string"
+									},
+									"paymentPublicKey": {
+										"type": "string"
+									},
+									"amountSats": {
+										"type": "number",
+										"format": "double"
+									},
+									"recipient": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"maxFeeRate",
+									"signedPsbtHex",
+									"paymentPublicKey",
+									"amountSats",
+									"recipient"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/revealer-api/v1/op_return/update-deposit": {
+			"post": {
+				"operationId": "ClientBroadcastDeposit",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RevealerTransaction"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"maxFeeRate": {
+										"type": "number",
+										"format": "double"
+									},
+									"signedPsbtHex": {
+										"type": "string"
+									},
+									"paymentPublicKey": {
+										"type": "string"
+									},
+									"amountSats": {
+										"type": "number",
+										"format": "double"
+									},
+									"recipient": {
+										"type": "string"
+									},
+									"txId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"maxFeeRate",
+									"signedPsbtHex",
+									"paymentPublicKey",
+									"amountSats",
+									"recipient",
+									"txId"
+								],
+								"type": "object"
 							}
 						}
 					}

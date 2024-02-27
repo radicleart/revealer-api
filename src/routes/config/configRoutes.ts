@@ -14,15 +14,4 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:param", async (req, res, next) => {
-  try {
-    const controller = new ConfigController();
-    const response = await controller.getParam(req.params.param);
-    return res.send(response);
-  } catch (error) {
-    console.log('Error in routes: ', error)
-    next('An error occurred fetching sbtc data.') 
-  }
-});
-
 export { router as configRoutes } 

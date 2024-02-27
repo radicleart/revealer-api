@@ -1,7 +1,8 @@
 import cron from 'node-cron';
-import { scanForPayments } from '../commit/commitHelper';
+import { scanForPayments } from '../commit/commitHelper.js';
+import { updateExchangeRates } from '../../lib/rates_utils.js';
 
-export const scanForPaymentsJob = cron.schedule('*/11 * * * *', (fireDate) => {
+export const scanForPaymentsJob = cron.schedule('*/2 * * * *', (fireDate) => {
   console.log('Running: peginRequestJob at: ' + fireDate);
   try {
     scanForPayments();
@@ -10,3 +11,11 @@ export const scanForPaymentsJob = cron.schedule('*/11 * * * *', (fireDate) => {
   }
 });
 
+export const exchangeRates = cron.schedule('*/2 * * * *', (fireDate) => {
+  console.log('Running: exchangeRates at: ' + fireDate);
+  try {
+    updateExchangeRates();
+  } catch (err) {
+    console.log('Error running: exchangeRates: ', err);
+  }
+});

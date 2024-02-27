@@ -1,15 +1,21 @@
-import { VoutI } from "sbtc-bridge-lib";
+import { Document } from "mongodb";
+import { CommitmentScriptDataType, VoutI } from "sbtc-bridge-lib";
 
-export enum CommitmentStatus {
-	UNPAID = 0,
-	PAID = 1,
-	REVEALED = 2,
-	RECLAIMED = 3,
+export enum RevealerTxTypes {
+	SBTC_DEPOSIT = 'SBTC_DEPOSIT',
+	SBTC_WITHDRAWAL = 'SBTC_WITHDRAWAL',
 }
 
-export enum CommitmentMode {
-	OP_DROP = 'OP_DROP',
+export enum RevealerTxModes {
 	OP_RETURN = 'OP_RETURN',
+	OP_DROP = 'OP_DROP',
+}
+
+export enum CommitmentStatus {
+	UNPAID = 'UNPAID',
+	PAID = 'PAID',
+	REVEALED = 'REVEALED',
+	RECLAIMED = 'RECLAIMED',
 }
 
 export enum RequestType {
@@ -29,14 +35,19 @@ export type ConfigI = {
 	btcSchnorrReveal: string; 
 	btcSchnorrReclaim: string; 
 	btcSchnorrOracle: string; 
-	host: string; 
-	port: number; 
+	host: string;
+	port: number;
 	walletPath: string; 
 	network: string; 
-	mode: string; 
+	stacksApi: string; 
+	stacksExplorerUrl: string;
+	bitcoinExplorerUrl: string; 
 	mempoolUrl: string; 
-	electrumUrl: string; 
-	blockCypherUrl: string; 
+	blockCypherUrl: string;
+	publicAppName: string;
+	publicAppVersion: string; 
+	sbtcContractId: string;
+	electrumUrl: string;
 };
     
 export type CommitmentType = {
@@ -44,7 +55,7 @@ export type CommitmentType = {
     _id?: string;
 	tries?: number;
     network: string;
-	status: number;
+	status: string;
     created: number;
     updated: number;
 	paidFromAddress?: string|undefined;
@@ -78,6 +89,23 @@ export type CommitmentRequest = {
 	inscriptionPayload?: string|undefined;
 }
 
+export type OpReturnRequest = {
+	originator:string;
+	recipient:string;
+	signature?:string;
+	amountSats:number;
+	paymentPublicKey:string;
+	paymentAddress:string;
+	feeMultiplier:number;
+}
+
+export type OpDropRequest = {
+	originator:string;
+	recipient:string;
+	amountSats:number;
+	reclaimPublicKey:string;
+	paymentAddress:string;
+}
 
 export type PubKeySet = {
 	stxAddress: string;
@@ -93,6 +121,31 @@ export type PubKeySet = {
 	psbt: string;
 	inputs: Array<number>;
   }
+
+  export interface RevealerTransaction {
+	_id?: string;
+	txId: string;
+	psbt?: string;
+	originator: string;
+	commitment?:CommitmentScriptDataType;
+	signed: boolean;
+	recipient: string;
+	amountSats: number;
+	confirmations: number;
+	created: number;
+	updated: number;
+	signature?: string;
+	paymentPublicKey: string;
+	paymentAddress: string;
+	mode: RevealerTxModes;
+	type: RevealerTxTypes;
+}
+
+export type PSBTHolder = {
+	hexPSBT:string;
+	b64PSBT:string;
+	txFee:number;
+}
 
   export type TaprootScriptType = {
 	address: string;

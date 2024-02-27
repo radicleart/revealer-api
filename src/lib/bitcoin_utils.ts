@@ -1,21 +1,95 @@
 import * as secp from '@noble/secp256k1';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
-import { getConfig } from './config';
-import { getNet } from './utils';
-import { UTXO } from '../types/revealer_types';
+import { getConfig } from './config.js';
+import { getNet } from './utils.js';
+import { UTXO } from '../types/revealer_types.js';
 
 const privKey = hex.decode('0101010101010101010101010101010101010101010101010101010101010101');
-const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
+export const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
 
-const OPTIONS = {
+export const OPTIONS = {
   method: "POST",
   headers: { 'content-type': 'text/plain' },
   body: '' 
 };
 
+const ADDRESS_VERSION_P2PKH =new Uint8Array([0])
+const ADDRESS_VERSION_P2SH = new Uint8Array([1])
+const ADDRESS_VERSION_P2WPKH = new Uint8Array([2])
+const ADDRESS_VERSION_P2WSH = new Uint8Array([3])
+const ADDRESS_VERSION_NATIVE_P2WPKH = new Uint8Array([4])
+const ADDRESS_VERSION_NATIVE_P2WSH = new Uint8Array([5])
+const ADDRESS_VERSION_NATIVE_P2TR = new Uint8Array([6])
+
+function getVersionAsType(version:string) {
+	if (version === '0x00') return 'pkh'
+	else if (version === '0x01') return 'sh'
+	else if (version === '0x04') return 'wpkh'
+	else if (version === '0x05') return 'wsh'
+	else if (version === '0x06') return 'tr'
+}
+  
+export function getAddressFromHashBytes(hashBytes:string, version:string) {
+	const net = (getConfig().network === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
+	if (!version.startsWith('0x')) version = '0x' + version
+	if (!hashBytes.startsWith('0x')) hashBytes = '0x' + hashBytes
+	let btcAddr:string|undefined;
+	try {
+	  let txType = getVersionAsType(version)
+	  let outType:any;
+	  if (txType === 'tr') {
+		outType = {
+		  type: getVersionAsType(version),
+		  pubkey: hex.decode(hashBytes.split('x')[1])
+		}
+	  } else {
+		outType = {
+		  type: getVersionAsType(version),
+		  hash: hex.decode(hashBytes.split('x')[1])
+		}
+	  }
+	  const addr:any = btc.Address(net);
+	  btcAddr = addr.encode(outType)
+	  return btcAddr
+	} catch (err:any) {
+	  btcAddr = err.message
+	  console.error('getAddressFromHashBytes: version:hashBytes: ' + version + ':' + hashBytes)
+	}
+	return btcAddr
+}
+  
+export function getHashBytesFromAddress(address:string):{version:string, hashBytes:string }|undefined {
+	const net = (getConfig().network === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
+	let outScript:any;
+	try {
+	  const addr:any = btc.Address(net);
+	  //const outScript = btc.OutScript.encode(addr.decode(address));
+	  const s = btc.OutScript.encode(addr.decode(address))
+	  const outScript = btc.OutScript.decode(s);
+	  if (outScript.type === "ms") {
+		return
+	  } else if (outScript.type === "pkh") {
+		return { version: hex.encode(ADDRESS_VERSION_P2PKH), hashBytes: hex.encode(outScript.hash) }
+	  } else if (outScript.type === "sh") {
+		return { version: hex.encode(ADDRESS_VERSION_P2SH), hashBytes: hex.encode(outScript.hash) }
+	  } else if (outScript.type === "wpkh") {
+		return { version: hex.encode(ADDRESS_VERSION_NATIVE_P2WPKH), hashBytes: hex.encode(outScript.hash) }
+	  } else if (outScript.type === "wsh") {
+		return { version: hex.encode(ADDRESS_VERSION_NATIVE_P2WSH), hashBytes: hex.encode(outScript.hash) }
+	  } else if (outScript.type === "tr") {
+		return { version: hex.encode(ADDRESS_VERSION_NATIVE_P2TR), hashBytes: hex.encode(outScript.pubkey) }
+	  }
+	  return
+	} catch (err:any) {
+	  console.error('getHashBytesFromAddress: un hash-byteable address' + address)
+	}
+	return
+}
+  
 export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any> {
     let result:any = {};
+	/**
 	if (address) {
         try {
           result = await bitcoinCoreAddressInfo(address);
@@ -25,11 +99,13 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
           console.error('fetchUtxoSet: addressValidation: ' + address + ' : ' + err.message)
         }
     }
+	 */
     try {
       const utxos = await mempoolFetchUTXOs(address);
       for (let utxo of utxos) {
-        const tx = await fetchTransaction(utxo.txid, verbose);
-        utxo.tx = tx;
+		const res = await mempoolFetchTransaction(utxo.txid);
+		if (verbose) res.hex = await mempoolFetchTransactionHex(utxo.txid);
+		utxo.tx = res;
       }
       result.utxos = utxos
     } catch (err:any) {
@@ -39,7 +115,7 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
     return result;
 }
   
-export async function fetchTransaction(txid:string, verbose:boolean) {
+async function fetchTransaction(txid:string, verbose:boolean) {
 	let dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getrawtransaction","params":["${txid}", ${verbose}]}`;
 	OPTIONS.body = dataString; 
 	let res;
@@ -271,7 +347,7 @@ function redeemAndWitnessScriptAddInput (utxo:any, p2shObj:any, hexy:any) {
 	}
 }
 
-async function handleError (response:any, message:string) {
+export async function handleError (response:any, message:string) {
 	if (response?.status !== 200) {
 	  const result = await response.json();
 	  console.error('==========================================================================');
