@@ -1,12 +1,14 @@
 import express from "express";
 import { OpReturnController } from "./OpReturnController.js";
+import { OpReturnRequest } from "../../types/revealer_types.js";
 
 const router = express.Router();
 const controller = new OpReturnController()
 
-router.get("/get-psbt-for-deposit/:recipient/:amountSats/:paymentPublicKey/:paymentAddress/:feeMultiplier", async (req, res, next) => {
+router.post("/get-psbt-for-deposit", async (req, res, next) => {
   try {
-    const response = await controller.getPsbtForDeposit(req.params.recipient, Number(req.params.amountSats), req.params.paymentPublicKey, req.params.paymentAddress, Number(req.params.feeMultiplier));
+    const deposit:OpReturnRequest = req.body;
+    const response = await controller.getPsbtForDeposit(deposit);
     if (response) {
       return res.send(response);
     }
@@ -16,9 +18,14 @@ router.get("/get-psbt-for-deposit/:recipient/:amountSats/:paymentPublicKey/:paym
   }
 });
 
-router.get("/get-psbt-for-withdrawal/:withdrawalAddress/:signature/:amountSats/:paymentPublicKey/:paymentAddress/:feeMultiplier", async (req, res, next) => {
+router.post("/get-psbt-for-withdrawal", async (req, res, next) => {
   try {
-    const response = await controller.getPsbtForWithdrawal(req.params.withdrawalAddress, req.params.signature, Number(req.params.amountSats), req.params.paymentPublicKey, req.params.paymentAddress, Number(req.params.feeMultiplier));
+    //const originator = req.headers.authorization
+    //if (originator !== withdrawal.originator) {
+    //  return res.status(401)
+    //}
+    const withdrawal:OpReturnRequest = req.body;
+    const response = await controller.getPsbtForWithdrawal(withdrawal);
     if (response) {
       return res.send(response);
     }
@@ -43,14 +50,14 @@ router.post("/broadcast-deposit", async (req, res, next) => {
 /**
  * Client performed the broadcast - 
  */
-router.post("/client-broadcast-deposit", async (req, res, next) => {
+router.post("/update-deposit", async (req, res, next) => {
   try {
     const tx = req.body;
     const result = await controller.clientBroadcastDeposit(tx);
     return res.send(result);
   } catch (error) {
     console.log('Error in routes: ', error)
-    next('An error occurred client-broadcast-deposit.') 
+    next('An error occurred update-deposit.') 
   }
 });
 

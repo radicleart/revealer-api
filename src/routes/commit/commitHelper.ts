@@ -1,15 +1,13 @@
 import { getNet } from "sbtc-bridge-lib/dist/wallet_utils";
-import * as secp from '@noble/secp256k1';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
-import { schnorr } from '@noble/curves/secp256k1';
-import { CommitmentType, TaprootScriptType, CommitmentStatus, UTXO, CommitmentRequest, CommitmentMode } from "../../types/revealer_types.js";
-import { buildDepositPayloadOpDrop } from "../../lib/sbtc_utils.js";
+import { CommitmentType, TaprootScriptType, CommitmentStatus, UTXO, CommitmentRequest, RevealerTxModes } from "../../types/revealer_types.js";
 import { toStorable } from "../../lib/utils.js";
 import { findCommitmentsByFilter, updateCommitment } from "./commitment_db.js";
 import { addInputs, fetchAddressTransactions, fetchUtxoSet, inputAmt } from "../../lib/bitcoin_utils.js";
 import { getConfig } from "../../lib/config.js";
 import { buildInscriptionPayload } from "../../lib/inscription_utils.js";
+import { buildDepositPayloadOpDrop } from "sbtc-bridge-lib";
 
 export function getCommitmentForInscription (commitRequest:CommitmentRequest) {
 	const net = getNet(getConfig().network);
@@ -29,7 +27,7 @@ export function getCommitmentForInscription (commitRequest:CommitmentRequest) {
 export function getCommitmentForSbtcDeposit(commitRequest:CommitmentRequest):TaprootScriptType {
 	const net = getNet(getConfig().network);
 
-	const data = buildDepositPayloadOpDrop(getConfig().network, commitRequest.revealFee, commitRequest.recipientStxPrincipal);
+	const data = buildDepositPayloadOpDrop(getConfig().network, commitRequest.recipientStxPrincipal, commitRequest.revealFee);
 	const scripts =  [
 		{ script: btc.Script.encode([hex.decode(data), 'DROP', hex.decode(commitRequest.revealerPublicKey), 'CHECKSIG']) },
 		{ script: btc.Script.encode(['IF', 144, 'CHECKSEQUENCEVERIFY', 'DROP', hex.decode(commitRequest.reclaimerPublicKey), 'CHECKSIG', 'ENDIF']) },
@@ -53,12 +51,12 @@ export async function getCommitPaymentPsbt (revealFeeWithGas:number, payToAddres
 
 export async function scanForPayments() {
 	let matchCount = 0;
-	const filter = { status: CommitmentStatus.UNPAID, mode: CommitmentMode.OP_DROP };
+	const filter = { status: CommitmentStatus.UNPAID, mode: RevealerTxModes.OP_DROP };
 	try {
 	  const requests:any = await findCommitmentsByFilter(filter);
 	  if (!requests || requests.length === 0) return;
 	  for (const peginRequest of requests) {
-		if (peginRequest.mode === CommitmentMode.OP_RETURN) {
+		if (peginRequest.mode === RevealerTxModes.OP_RETURN) {
 		  console.log('Skipping op_return');
 		} else {
 		  if (peginRequest.commitTxScript) {

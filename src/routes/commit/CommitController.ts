@@ -75,37 +75,5 @@ export class CommitController {
     } catch(err) {
       throw new Error(err.message);
     }
-  }
-
-  /**
-   * Build and save the commitment data for an sbtc deposit. Return the address for invoice.
-   * If payFromAddress is provided also returns a payment psbt for the web wallet.
-   * @param commitmentRequest
-   * @returns CommitmentResponse
-   */
-    @Post("/sbtc-deposit")
-    public async saveSBTCCommitment(@Body() commitmentRequest:CommitmentRequest): Promise<CommitmentResponse> {
-      try {
-        const taprootScript = getCommitmentForSbtcDeposit(commitmentRequest);
-        const commitment:CommitmentType = {
-          commitmentRequest,
-          network: getConfig().network,
-          taprootScript,
-          status: CommitmentStatus.UNPAID, 
-          requestType: RequestType.SBTC_DEPOSIT,
-          created: new Date().getTime(),
-          updated: new Date().getTime()
-        }
-        saveCommitment(commitment)
-  
-        let paymentPsbt
-        if (commitmentRequest.payFromAddress) {
-          paymentPsbt = getCommitPaymentPsbt(commitmentRequest.revealFee, commitment.taprootScript.address, commitmentRequest.payFromAddress);
-        }
-        return { paymentPsbt, commitAddress: commitment.taprootScript.address };
-      } catch(err) {
-        throw new Error(err.message);
-      }
-    }
-  
+  }  
 }

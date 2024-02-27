@@ -1,26 +1,21 @@
 import { Document } from "mongodb";
-import { VoutI } from "sbtc-bridge-lib";
+import { CommitmentScriptDataType, VoutI } from "sbtc-bridge-lib";
 
 export enum RevealerTxTypes {
-	SBTC_DEPOSIT,
-	SBTC_WITHDRAWAL,
+	SBTC_DEPOSIT = 'SBTC_DEPOSIT',
+	SBTC_WITHDRAWAL = 'SBTC_WITHDRAWAL',
 }
 
 export enum RevealerTxModes {
-	OP_RETURN,
-	OP_DROP,
+	OP_RETURN = 'OP_RETURN',
+	OP_DROP = 'OP_DROP',
 }
 
 export enum CommitmentStatus {
-	UNPAID = 0,
-	PAID = 1,
-	REVEALED = 2,
-	RECLAIMED = 3,
-}
-
-export enum CommitmentMode {
-	OP_DROP = 'OP_DROP',
-	OP_RETURN = 'OP_RETURN',
+	UNPAID = 'UNPAID',
+	PAID = 'PAID',
+	REVEALED = 'REVEALED',
+	RECLAIMED = 'RECLAIMED',
 }
 
 export enum RequestType {
@@ -60,7 +55,7 @@ export type CommitmentType = {
     _id?: string;
 	tries?: number;
     network: string;
-	status: number;
+	status: string;
     created: number;
     updated: number;
 	paidFromAddress?: string|undefined;
@@ -94,6 +89,23 @@ export type CommitmentRequest = {
 	inscriptionPayload?: string|undefined;
 }
 
+export type OpReturnRequest = {
+	originator:string;
+	recipient:string;
+	signature?:string;
+	amountSats:number;
+	paymentPublicKey:string;
+	paymentAddress:string;
+	feeMultiplier:number;
+}
+
+export type OpDropRequest = {
+	originator:string;
+	recipient:string;
+	amountSats:number;
+	reclaimPublicKey:string;
+	paymentAddress:string;
+}
 
 export type PubKeySet = {
 	stxAddress: string;
@@ -113,7 +125,9 @@ export type PubKeySet = {
   export interface RevealerTransaction {
 	_id?: string;
 	txId: string;
-	psbt: string;
+	psbt?: string;
+	originator: string;
+	commitment?:CommitmentScriptDataType;
 	signed: boolean;
 	recipient: string;
 	amountSats: number;
@@ -127,11 +141,11 @@ export type PubKeySet = {
 	type: RevealerTxTypes;
 }
 
-  export type PSBTHolder = {
+export type PSBTHolder = {
 	hexPSBT:string;
 	b64PSBT:string;
 	txFee:number;
-  }
+}
 
   export type TaprootScriptType = {
 	address: string;

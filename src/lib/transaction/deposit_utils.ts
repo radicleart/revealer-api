@@ -5,11 +5,11 @@ import { hex } from '@scure/base';
 import type { Transaction } from '@scure/btc-signer' 
 import { buildDepositPayload } from './payload_utils.js' 
 import { addInputs, getNet, getPegWalletAddressFromPublicKey, inputAmt } from './wallet_utils.js';
-import { BridgeTransactionType, DepositPayloadUIType } from 'sbtc-bridge-lib';
+import { BridgeTransactionType, CommitmentScriptDataType, buildDepositPayloadOpDrop, toStorable } from 'sbtc-bridge-lib';
 import { UTXO } from '../../types/revealer_types.js';
 import { fetchUtxoSet } from '../bitcoin_utils.js';
 import { getConfig } from '../config.js';
-import { SbtcWalletController, cachedUIObject } from '../../routes/sbtc/SbtcWalletController.js';
+import { SbtcWalletController } from '../../routes/sbtc/SbtcWalletController.js';
 import { FeeEstimateResponse } from '../../types/sbtc_ui_types.js';
 
 
@@ -20,7 +20,7 @@ export const revealPayment = 10001
 export const dust = 500;
 
 /**
- * buildDepositTransaction:Transaction
+ * buildOpReturnDepositTransaction:Transaction
  * @param network (testnet|mainnet)
  * @param sbtcWalletPublicKey - the sbtc wallet public to sending the deposit to
  * @param uiPayload:DepositPayloadUIType
@@ -32,7 +32,7 @@ export const dust = 500;
  * - utxos the users utxos to spend from - from mempool/blockstream
  * @returns Transaction from @scure/btc-signer
  */
-export async function buildDepositTransaction(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number):Promise<{transaction:Transaction, txFee:number}> {
+export async function buildOpReturnDepositTransaction(recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number):Promise<{transaction:Transaction, txFee:number}> {
 	const network = getConfig().network
 	const net = getNet(getConfig().network);
 	const controller = new SbtcWalletController();
@@ -44,12 +44,12 @@ export async function buildDepositTransaction(recipient:string, amountSats:numbe
 		utxos = (await fetchUtxoSet(paymentAddress, true)).utxos
 	} catch (err:any) {
 		console.error('=============================================================== ')
-		console.error('buildDepositTransaction: Error fetching utxos: address: ' + paymentAddress)
-		console.error('buildDepositTransaction: Error fetching utxos: ' + err.message)
+		console.error('buildOpReturnDepositTransaction: Error fetching utxos: address: ' + paymentAddress)
+		console.error('buildOpReturnDepositTransaction: Error fetching utxos: ' + err.message)
 		console.error('=============================================================== ')
 		throw new Error('Unable to lookup UTXOs for address this could be a network failure or rate limiting by remote service: ' + paymentAddress)
 	}
-	//console.log('buildDepositTransaction: utxos:', utxos)
+	//console.log('buildOpReturnDepositTransaction: utxos:', utxos)
 
 	const sbtcWalletAddress = getPegWalletAddressFromPublicKey(network, sbtcWalletPublicKey)
 	const data = buildDepositPayload(network, recipient);
@@ -65,20 +65,6 @@ export async function buildDepositTransaction(recipient:string, amountSats:numbe
 	return { transaction, txFee};
 }
 
-export function getBridgeDeposit(network:string, uiPayload:DepositPayloadUIType, originator:string):BridgeTransactionType {
-	const req:BridgeTransactionType = {
-		originator,
-		uiPayload,
-		status: 1,
-		mode: 'op_return',
-		requestType: 'deposit',
-		network,
-		created: new Date().getTime(),
-		updated: new Date().getTime()
-	}
-	return req;
-}
-
 export function maxCommit(addressInfo:any) {
 	if (!addressInfo || !addressInfo.utxos || addressInfo.utxos.length === 0) return 0;
 	const summ = addressInfo?.utxos?.map((item:{value:number}) => item.value).reduce((prev:number, curr:number) => prev + curr, 0);
@@ -89,9 +75,9 @@ export function estimateActualFee (tx:btc.Transaction, feeInfo:any):number {
 	try {
 		const vsize = tx.vsize;
 		const fees = [
-			Math.floor(vsize * feeInfo['low_fee_per_kb'] / 1024),
-			Math.floor(vsize * feeInfo['medium_fee_per_kb'] / 1024),
-			Math.floor(vsize * feeInfo['high_fee_per_kb'] / 1024),
+			Math.floor(vsize * 10 * feeInfo['low_fee_per_kb'] / 1024),
+			Math.floor(vsize * 10 * feeInfo['medium_fee_per_kb'] / 1024),
+			Math.floor(vsize * 10 * feeInfo['high_fee_per_kb'] / 1024),
 		]
 		return fees[1];
 	} catch (err:any) {
@@ -99,32 +85,22 @@ export function estimateActualFee (tx:btc.Transaction, feeInfo:any):number {
 	}
 }
 
-/**
-function calculateDepositFees (network:string, opDrop:boolean, amount:number, feeInfo:any, utxos:Array<UTXO>, commitTxScriptAddress:string, data:Uint8Array|undefined) {
-	try {
-		const net = getNet(network);
-		let vsize = 0;
-		const tx = new btc.Transaction({ allowUnknowInput: true, allowUnknowOutput: true, allowUnknownInputs:true, allowUnknownOutputs:true });
-		addInputs(network, amount, revealPayment, tx, true, utxos, hex.encode(secp.getPublicKey(privKey, true)));
-		if (!opDrop) {
-			if (data) tx.addOutput({ script: btc.Script.encode(['RETURN', data]), amount: BigInt(0) });
-			tx.addOutputAddress(commitTxScriptAddress, BigInt(amount), net);
-		} else {
-			tx.addOutputAddress(commitTxScriptAddress, BigInt(amount), net );
-		}
-		const changeAmount = inputAmt(tx) - (amount); 
-		if (changeAmount > 0) tx.addOutputAddress(commitTxScriptAddress, BigInt(changeAmount), net);
-		//tx.sign(privKey);
-		//tx.finalize();
-		vsize = tx.vsize;
-		const fees = [
-			Math.floor(vsize * feeInfo['low_fee_per_kb'] / 1024),
-			Math.floor(vsize * feeInfo['medium_fee_per_kb'] / 1024),
-			Math.floor(vsize * feeInfo['high_fee_per_kb'] / 1024),
-		]
-		return fees;
-	} catch (err:any) {
-		return [ 850, 1000, 1150]
-	}
+export async function buildOpDropDepositTransaction(recipient:string, amountSats:number, reclaimPublicKey:string):Promise<CommitmentScriptDataType> {
+	const network = getConfig().network
+	const net = getNet(getConfig().network);
+	const controller = new SbtcWalletController();
+	const cachedUIObject = await (controller.initUi())
+	const sbtcWalletPublicKey = cachedUIObject.sbtcContractData.sbtcWalletPublicKey
+
+	const data = buildData(network, recipient, amountSats);
+	const scripts =  [
+		{ script: btc.Script.encode([hex.decode(data), 'DROP', hex.decode(sbtcWalletPublicKey), 'CHECKSIG']) },
+		{ script: btc.Script.encode(['IF', 144, 'CHECKSEQUENCEVERIFY', 'DROP', hex.decode(reclaimPublicKey), 'CHECKSIG', 'ENDIF']) },
+	]
+	const script = btc.p2tr(btc.TAPROOT_UNSPENDABLE_KEY, scripts, net, true);
+	return toStorable(script);
 }
- */
+
+function buildData (network:string, principal:string, revealFee:number):string {
+	return buildDepositPayloadOpDrop(network, principal, revealFee);
+}

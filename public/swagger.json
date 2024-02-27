@@ -385,8 +385,7 @@
 						"format": "double"
 					},
 					"status": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					},
 					"network": {
 						"type": "string"
@@ -413,6 +412,34 @@
 				],
 				"type": "object"
 			},
+			"OpDropRequest": {
+				"properties": {
+					"paymentAddress": {
+						"type": "string"
+					},
+					"reclaimPublicKey": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"paymentAddress",
+					"reclaimPublicKey",
+					"amountSats",
+					"recipient",
+					"originator"
+				],
+				"type": "object"
+			},
 			"PSBTHolder": {
 				"properties": {
 					"txFee": {
@@ -433,19 +460,134 @@
 				],
 				"type": "object"
 			},
+			"OpReturnRequest": {
+				"properties": {
+					"feeMultiplier": {
+						"type": "number",
+						"format": "double"
+					},
+					"paymentAddress": {
+						"type": "string"
+					},
+					"paymentPublicKey": {
+						"type": "string"
+					},
+					"amountSats": {
+						"type": "number",
+						"format": "double"
+					},
+					"signature": {
+						"type": "string"
+					},
+					"recipient": {
+						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"feeMultiplier",
+					"paymentAddress",
+					"paymentPublicKey",
+					"amountSats",
+					"recipient",
+					"originator"
+				],
+				"type": "object"
+			},
+			"CommitmentScriptDataType": {
+				"properties": {
+					"tweakedPubkey": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"tapMerkleRoot": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"tapLeafScript": {},
+					"tapInternalKey": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"leaves": {},
+					"wsh": {
+						"type": "string"
+					},
+					"witnessScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"redeemScript": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"paymentType": {
+						"type": "string"
+					},
+					"script": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"$ref": "#/components/schemas/Uint8Array"
+							}
+						]
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"paymentType"
+				],
+				"type": "object"
+			},
 			"RevealerTxModes": {
 				"enum": [
-					0,
-					1
+					"OP_RETURN",
+					"OP_DROP"
 				],
-				"type": "number"
+				"type": "string"
 			},
 			"RevealerTxTypes": {
 				"enum": [
-					0,
-					1
+					"SBTC_DEPOSIT",
+					"SBTC_WITHDRAWAL"
 				],
-				"type": "number"
+				"type": "string"
 			},
 			"RevealerTransaction": {
 				"properties": {
@@ -457,6 +599,12 @@
 					},
 					"psbt": {
 						"type": "string"
+					},
+					"originator": {
+						"type": "string"
+					},
+					"commitment": {
+						"$ref": "#/components/schemas/CommitmentScriptDataType"
 					},
 					"signed": {
 						"type": "boolean"
@@ -498,7 +646,7 @@
 				},
 				"required": [
 					"txId",
-					"psbt",
+					"originator",
 					"signed",
 					"recipient",
 					"amountSats",
@@ -684,22 +832,22 @@
 				}
 			}
 		},
-		"/revealer-api/v1/commitment/sbtc-deposit": {
+		"/revealer-api/v1/op_drop/get-commitment-address": {
 			"post": {
-				"operationId": "SaveSBTCCommitment",
+				"operationId": "GetCommitmentAddress",
 				"responses": {
 					"200": {
-						"description": "CommitmentResponse",
+						"description": "unsigned psbt",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/CommitmentResponse"
+									"type": "string"
 								}
 							}
 						}
 					}
 				},
-				"description": "Build and save the commitment data for an sbtc deposit. Return the address for invoice.\nIf payFromAddress is provided also returns a payment psbt for the web wallet.",
+				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -707,15 +855,15 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CommitmentRequest"
+								"$ref": "#/components/schemas/OpDropRequest"
 							}
 						}
 					}
 				}
 			}
 		},
-		"/revealer-api/v1/op_return/get-psbt-for-deposit/{recipient}/{amountSats}/{paymentPublicKey}/{paymentAddress}/{feeMultiplier}": {
-			"get": {
+		"/revealer-api/v1/op_return/get-psbt-for-deposit": {
+			"post": {
 				"operationId": "GetPsbtForDeposit",
 				"responses": {
 					"200": {
@@ -731,58 +879,21 @@
 				},
 				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
 				"security": [],
-				"parameters": [
-					{
-						"description": "stacks account or contract principle to receive sBTC",
-						"in": "path",
-						"name": "recipient",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "amount user wishes to deposit",
-						"in": "path",
-						"name": "amountSats",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"description": "public key to spend utxos",
-						"in": "path",
-						"name": "paymentPublicKey",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "also used for change address to send deposit from",
-						"in": "path",
-						"name": "paymentAddress",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "feeMultiplier",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpReturnRequest"
+							}
 						}
 					}
-				]
+				}
 			}
 		},
-		"/revealer-api/v1/op_return/get-psbt-for-withdrawal/{withdrawalAddress}/{signature}/{amountSats}/{paymentPublicKey}/{paymentAddress}/{feeMultiplier}": {
-			"get": {
+		"/revealer-api/v1/op_return/get-psbt-for-withdrawal": {
+			"post": {
 				"operationId": "GetPsbtForWithdrawal",
 				"responses": {
 					"200": {
@@ -796,64 +907,19 @@
 						}
 					}
 				},
-				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
+				"description": "Build an sBTC withdrawal PSBT using OP_RETURN for the user to sign and sed.",
 				"security": [],
-				"parameters": [
-					{
-						"description": "bitcoin address to receive BTC",
-						"in": "path",
-						"name": "withdrawalAddress",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "signature",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "amount user wishes to deposit",
-						"in": "path",
-						"name": "amountSats",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"description": "public key to spend utxos",
-						"in": "path",
-						"name": "paymentPublicKey",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "also used for change address to send deposit from",
-						"in": "path",
-						"name": "paymentAddress",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "feeMultiplier",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpReturnRequest"
+							}
 						}
 					}
-				]
+				}
 			}
 		},
 		"/revealer-api/v1/op_return/broadcast-deposit": {
@@ -912,7 +978,7 @@
 				}
 			}
 		},
-		"/revealer-api/v1/op_return/client-broadcast-deposit": {
+		"/revealer-api/v1/op_return/update-deposit": {
 			"post": {
 				"operationId": "ClientBroadcastDeposit",
 				"responses": {
