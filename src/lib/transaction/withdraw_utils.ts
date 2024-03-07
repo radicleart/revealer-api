@@ -46,6 +46,7 @@ export async function buildWithdrawalTransaction(withdrawalAddress:string, signa
 		throw new Error('Unable to lookup UTXOs for address this could be a network failure or rate limiting by remote service: ' + paymentAddress)
 	}
 	const sbtcWalletAddress = getPegWalletAddressFromPublicKey(network, sbtcWalletPublicKey)
+	console.log('Withdrawal: from sbtc wallet: ' + sbtcWalletAddress)
 	const data = buildData(network, amountSats, signature, false)
 	const tx = new btc.Transaction({ allowUnknowOutput: true, allowUnknownInputs:true, allowUnknownOutputs:true });
 	const txFee = estimateActualFee(tx, fees.feeInfo) * feeMultiplier

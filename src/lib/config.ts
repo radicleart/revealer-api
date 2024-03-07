@@ -1,4 +1,4 @@
-import { ConfigI } from "../types/revealer_types";
+import { ConfigI } from "../types/revealer_types.js";
 
 let CONFIG= {} as ConfigI;
 

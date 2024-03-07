@@ -115,7 +115,50 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
     return result;
 }
   
-async function fetchTransaction(txid:string, verbose:boolean) {
+export async function getBlock(hash:string, verbosity:number) {
+	const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getblock","params":["${hash}", ${verbosity}]}`;
+	OPTIONS.body = dataString;
+	let res;
+	try {
+		const response = await fetch(BASE_URL, OPTIONS);
+		await handleError(response, 'getBlock error: ');
+		const result = await response.json();
+		return result.result;
+	} catch (err) {}
+	if (!res) {
+		try {
+			let url = getConfig().mempoolUrl + '/block/' + hash;
+			let response = await fetch(url);
+			if (response.status !== 200) throw new Error('Unable to fetch transaction for: ' + hash);
+			const blockM = await response.json();
+
+			const block = {
+				versionHex: blockM.version,
+				previousblockhash: blockM.previousblockhash,
+				merkleroot: blockM.merkle_root,
+				time: blockM.timestamp,
+				bits: blockM.bits,
+				nonce: blockM.nonce,
+				hash: blockM.id,
+				...blockM
+			} as any
+
+			url = getConfig().mempoolUrl + '/block/' + hash + '/txids';
+			response = await fetch(url);
+			const tx = await response.json();
+
+			block.tx = tx
+
+			return block;
+		} catch(err) {
+			console.log(err)
+			return;
+		}
+	}
+	return res;
+}
+  
+export async function fetchTransaction(txid:string, verbose:boolean) {
 	let dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getrawtransaction","params":["${txid}", ${verbose}]}`;
 	OPTIONS.body = dataString; 
 	let res;
@@ -130,14 +173,50 @@ async function fetchTransaction(txid:string, verbose:boolean) {
 	}
 	return res;
 }
+export async function fetchTransactionHex(txid:string) {
+	try {
+	  //https://api.blockcypher.com/v1/btc/test3/txs/<txID here>?includeHex=true
+	  //https://mempool.space/api/tx/15e10745f15593a899cef391191bdd3d7c12412cc4696b7bcb669d0feadc8521/hex
+	  const url = getConfig().mempoolUrl + '/tx/' + txid + '/hex';
+	  const response = await fetch(url);
+	  const hex = await response.text();
+	  return hex;
+	} catch(err) {
+	  console.log(err)
+	  return;
+	}
+  }
   
-export async function fetchAddressTransactions(address:string, lastId?:string) {
-	let url = getConfig().mempoolUrl + '/address/' + address + '/txs';
-	if (lastId) url += '/' + lastId
-	const response = await fetch(url);
-	const result = await response.json();
-	return result;
-}
+export async function fetchAddressTransactions(address:string, txId?:string) {
+	const urlBase = getConfig().mempoolUrl + '/address/' + address + '/txs';
+	let url = urlBase
+	if (txId) {
+		url = urlBase + '/chain/' + txId;
+	}
+	console.log('fetchAddressTransactions: url: ' + url)
+	let response:any;
+	let allResults:Array<any> = [];
+	let results:Array<any>;
+	let fetchMore = true;
+	do {
+		try {
+			response = await fetch(url);
+			results = await response.json();
+			if (results && results.length > 0) {
+				console.log('fetchAddressTransactions: ' + results.length + ' found at ' + results[(results.length-1)].status.block_height)
+				url = urlBase + '/chain/' + results[(results.length-1)].txid;
+				allResults = allResults.concat(results)
+			} else {
+			  fetchMore = false
+			}
+		} catch(err:any) {
+			console.error('fetchAddressTransactions' + err.message)
+			fetchMore = false
+		}
+	} while (fetchMore);
+	console.log('fetchAddressTransactions: total of ' + allResults.length + ' found at ' + address)
+	return allResults;
+  } 
   
 /**
  * getAddressFromOutScript converts a script to an address

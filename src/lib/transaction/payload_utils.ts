@@ -10,6 +10,8 @@ import { recoverSignature } from "micro-stacks/connect";
 import { getAddressFromOutScript, getNet } from './wallet_utils.js';
 import { PayloadType } from 'sbtc-bridge-lib';
 import { bitcoinToSats } from './formatting.js';
+import { findTransactionByTxId } from '../../routes/transactions/transaction_db.js';
+import { CommitmentStatus, RevealerTransaction, RevealerTxModes, RevealerTxTypes } from '../../types/revealer_types.js';
 
 const concat = P.concatBytes;
 
@@ -30,6 +32,59 @@ keySetForFeeCalculation.push({
   ecdsaPub: secp.getPublicKey(priv, true),
   schnorrPub: secp.getPublicKey(priv, false)
 })
+
+export function convertToRevealerTransaction(payload:PayloadType, tx:any):RevealerTransaction {
+	const revealerTx:RevealerTransaction = {
+		txId: tx.txid,
+		originator: payload.stacksAddress,
+		amountSats: payload.amountSats,
+		paymentAddress: tx.vin[0].prevout.scriptpubkey_address,
+		paymentPublicKey: tx.vin[0].prevout.scriptpubkey_type,
+		mode: RevealerTxModes.OP_RETURN,
+		type: (payload.opcode === '3C') ? RevealerTxTypes.SBTC_DEPOSIT : RevealerTxTypes.SBTC_WITHDRAWAL,
+		created: (new Date()).getTime(),
+		updated: (new Date()).getTime(),
+		recipient: (payload.opcode === '3C') ? payload.stacksAddress : tx.vout[1].scriptpubkey_address,
+		signed: true,
+		confirmations: tx.status.block_height,
+		blockHeight: tx.status.block_height,
+		status: CommitmentStatus.PENDING,
+		sbtcPublicKey: payload.sbtcPublicKey
+	}
+	return revealerTx
+}
+
+export function parseRawPayload(network:string, d0:string, vout1Address:string|undefined, sigMode: 'rsv'|'vrs'):PayloadType {
+	let d1 = (hex.decode(d0)).subarray(4)
+	let magicOp = getMagicAndOpCode(d1);
+	if (magicOp.opcode !== '3C' && magicOp.opcode !== '3E') {
+		d1 = (hex.decode(d0)).subarray(5)
+		magicOp = getMagicAndOpCode(d1);
+	}
+	if (magicOp.opcode === '3C') {
+		const payload = parseDepositPayload(d1)
+		return payload
+	} else if (magicOp.opcode === '3E') {
+		try {
+			if (vout1Address) return parseWithdrawPayload(network, hex.encode(d1), vout1Address, sigMode)
+			else throw new Error('Withdrawal requires the address from output 1: ' + magicOp.opcode)
+		} catch (err:any) {
+			return {
+				opcode: '3E',
+				prinType: 0,
+				stacksAddress: undefined,
+				lengthOfCname: 0,
+				cname: undefined,
+				lengthOfMemo: 0,
+				memo: undefined,
+				revealFee: 0,
+				amountSats: 0
+			};
+				}
+	} else {
+		throw new Error('Wrong opcode: ' + magicOp.opcode)
+	}
+}
 
 export function parseDepositPayload(d1:Uint8Array):PayloadType {
 	const magicOp = getMagicAndOpCode(d1);
@@ -158,15 +213,20 @@ function parseWithdrawalPayloadNoMagic(network:string, d1:Uint8Array, bitcoinAdd
 	const amountSats = bigUint64ToAmount(amtB);
 	let signature = (hex.encode(d1.subarray(9, 74)));
 	const msgHash = getStacksSimpleHashOfDataToSign(network, amountSats, bitcoinAddress);
-	const pubKey = getPubkeySignature(hex.decode(msgHash), signature, sigMode)
-	console.log('parseWithdrawalPayloadNoMagic:pubKey: ' + hex.encode(pubKey))
-	const stxAddresses = getStacksAddressFromPubkey(pubKey);
-	const stacksAddress = (network === network) ? stxAddresses.tp2pkh : stxAddresses.mp2pkh;
+	let stacksAddress:string;
+	try {
+		const pubKey = getPubkeySignature(hex.decode(msgHash), signature, sigMode)
+		console.log('parseWithdrawalPayloadNoMagic:pubKey: ' + hex.encode(pubKey))
+		const stxAddresses = getStacksAddressFromPubkey(pubKey);
+		stacksAddress = (network === network) ? stxAddresses.tp2pkh : stxAddresses.mp2pkh;
+	} catch (err:any) {
+		//
+	}
 	return {
 		opcode,
 		stacksAddress,
 		signature,
-		amountSats
+		amountSats,
 	};
 }
 
@@ -280,26 +340,37 @@ export function readDepositValue(outputs:Array<any>) {
  * @param txHex 
  * @returns 
  */
-export function parsePayloadFromTransaction(network:string, txHex:string):PayloadType {
+export async function parsePayloadFromTransaction(network:string, txHex:string):Promise<PayloadType> {
 	const tx:btc.Transaction = btc.Transaction.fromRaw(hex.decode(txHex), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
 	const out0 = tx.getOutput(0);
 	const script0 = out0.script as Uint8Array
 	const spendScr = btc.OutScript.decode(script0);
+
 	let payload = {} as PayloadType;
 	if (spendScr.type === 'unknown') {
 		if (!tx.getOutput(1) || !tx.getOutput(1).script) throw new Error('no output 1')
-		
 		payload = parsePayloadFromOutput(network, tx);
 		if (payload.opcode === '3C') payload.amountSats = Number(tx.getOutput(1).amount)
-		//payload.dust = Number(tx.getOutput(1).amount)
+	} else if (spendScr.type === 'tr') {
+		// op_drop commits do not contain the payload data !
+		const revealerTx:RevealerTransaction = await findTransactionByTxId(tx.id)
+		payload = {
+			mode: RevealerTxModes.OP_DROP,
+			amountSats: ( revealerTx ) ? revealerTx.amountSats : 0,
+			opcode: '3C',
+		}
 	}
-	//console.log('parsePayloadFromTransaction: payload: ' + payload);
 	return payload;
 }
 
 export function parsePayloadFromOutput(network:string, tx:btc.Transaction):PayloadType {
-	const out0 = tx.getOutput(0)
-	let d1 = out0.script?.subarray(5) as Uint8Array // strip the op type and data length
+	//const out0 = tx.getOutput(0)
+	//let d1 = out0.script?.subarray(5) as Uint8Array // strip the op type and data length
+	const vout1Address = getAddressFromOutScript(network, tx.getOutput(1).script)
+	let payload = parseRawPayload(network, hex.encode(tx.getOutput(0).script), vout1Address, 'vrs')
+	return payload
+
+	/**
 	let witnessData = getMagicAndOpCode(d1);
 	if (witnessData.opcode !== '3C' && witnessData.opcode !== '3E') {
 		d1 = out0.script?.subarray(2) as Uint8Array // strip the op type and data length
@@ -334,6 +405,7 @@ export function parsePayloadFromOutput(network:string, tx:btc.Transaction):Paylo
 	} else {
 	  throw new Error('Wrong opcode : expected: 3E or 3C :  recieved: ' + witnessData.opcode)
 	}
+	 */
 }
 
 /**

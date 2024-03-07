@@ -1,11 +1,21 @@
 import cron from 'node-cron';
-import { scanForPayments } from '../commit/commitHelper.js';
+import { scanUnpaidTransactions } from '../transactions/transactionScanner.js';
 import { updateExchangeRates } from '../../lib/rates_utils.js';
+import { saveAllSbtcEvents } from '../events/events_helper.js';
 
-export const scanForPaymentsJob = cron.schedule('*/2 * * * *', (fireDate) => {
+export const sbtcEventJob = cron.schedule('*/17 * * * *', (fireDate) => {
+  console.log('Running: sbtcEventJob at: ' + fireDate);
+  try {
+    //saveAllSbtcEvents();
+  } catch (err) {
+    console.log('Error running: saveAllSbtcEvents: ', err);
+  }
+});
+
+export const scanForPaymentsJob = cron.schedule('*/10 * * * *', (fireDate) => {
   console.log('Running: peginRequestJob at: ' + fireDate);
   try {
-    scanForPayments();
+    scanUnpaidTransactions();
   } catch (err) {
     console.log('Error running: scanForPaymentsJob: ', err);
   }

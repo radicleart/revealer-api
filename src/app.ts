@@ -6,13 +6,15 @@ import morgan from "morgan";
 import cors from "cors";
 import { connect } from './lib/data/mongodb_connection.js'
 import { configRoutes } from './routes/config/configRoutes.js'
+import { eventRoutes } from './routes/events/eventRoutes.js'
 import { sbtcRoutes } from './routes/sbtc/sbtcRoutes.js'
-import { commitRoutes } from './routes/commit/commitRoutes.js'
 import { opDropRoutes } from './routes/op_drop/opDropRoutes.js'
 import { opReturnRoutes } from './routes/op_return/opReturnRoutes.js'
+import { payloadRoutes } from './routes/payload/payloadRoutes.js'
+import { transactionRoutes } from './routes/transactions/transactionRoutes.js'
 import { createRequire } from 'node:module';
 import { getExchangeRates } from './lib/rates_utils.js';
-import { exchangeRates, scanForPaymentsJob } from './routes/jobs/JobScheduler.js';
+import { exchangeRates, sbtcEventJob, scanForPaymentsJob } from './routes/jobs/JobScheduler.js';
 import { WebSocketServer } from 'ws'
 import { authorised } from './lib/utils.js';
 
@@ -49,10 +51,12 @@ app.use((req, res, next) => {
 app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 app.use('/revealer-api/v1/config', configRoutes);
-app.use('/revealer-api/v1/commitment', commitRoutes);
+app.use('/revealer-api/v1/events', eventRoutes);
 app.use('/revealer-api/v1/sbtc', sbtcRoutes);
 app.use('/revealer-api/v1/op_drop', opDropRoutes);
 app.use('/revealer-api/v1/op_return', opReturnRoutes);
+app.use('/revealer-api/v1/payload', payloadRoutes);
+app.use('/revealer-api/v1/transactions', transactionRoutes);
 console.log(`\n\nExpress is listening at http://localhost:${getConfig().port}`);
 console.log('Startup Environment: ', process.env.TARGET_ENV);
 console.log(`Mongo connection at ${getConfig().mongoDbUrl}\n\n`);
@@ -62,6 +66,7 @@ async function connectToMongoCloud() {
     return;
   });
   const wss = new WebSocketServer({ server })
+  sbtcEventJob.start();
   scanForPaymentsJob.start();
   exchangeRates.start();
   let rates = await getExchangeRates()

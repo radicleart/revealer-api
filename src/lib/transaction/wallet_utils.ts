@@ -3,7 +3,7 @@ import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import { schnorr } from '@noble/curves/secp256k1';
 import { CommitKeysI } from 'sbtc-bridge-lib';
-import { UTXO } from '../../types/revealer_types';
+import { UTXO } from '../../types/revealer_types.js';
 
 const privKey = hex.decode('0101010101010101010101010101010101010101010101010101010101010101');
 const priv = secp.utils.randomPrivateKey()

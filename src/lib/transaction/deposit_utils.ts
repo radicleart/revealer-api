@@ -11,6 +11,7 @@ import { fetchUtxoSet } from '../bitcoin_utils.js';
 import { getConfig } from '../config.js';
 import { SbtcWalletController } from '../../routes/sbtc/SbtcWalletController.js';
 import { FeeEstimateResponse } from '../../types/sbtc_ui_types.js';
+import { getCurrentSbtcPublicKey } from '../sbtc_utils.js';
 
 
 const concat = P.concatBytes;
@@ -88,9 +89,7 @@ export function estimateActualFee (tx:btc.Transaction, feeInfo:any):number {
 export async function buildOpDropDepositTransaction(recipient:string, amountSats:number, reclaimPublicKey:string):Promise<CommitmentScriptDataType> {
 	const network = getConfig().network
 	const net = getNet(getConfig().network);
-	const controller = new SbtcWalletController();
-	const cachedUIObject = await (controller.initUi())
-	const sbtcWalletPublicKey = cachedUIObject.sbtcContractData.sbtcWalletPublicKey
+	const sbtcWalletPublicKey = await getCurrentSbtcPublicKey()
 
 	const data = buildData(network, recipient, amountSats);
 	const scripts =  [

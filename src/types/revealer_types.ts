@@ -12,10 +12,11 @@ export enum RevealerTxModes {
 }
 
 export enum CommitmentStatus {
-	UNPAID = 'UNPAID',
-	PAID = 'PAID',
-	REVEALED = 'REVEALED',
-	RECLAIMED = 'RECLAIMED',
+	UNPAID = 0,
+	PENDING = 1,
+	PAID = 2,
+	REVEALED = 3,
+	RECLAIMED = 4,
 }
 
 export enum RequestType {
@@ -128,6 +129,7 @@ export type PubKeySet = {
 	psbt?: string;
 	originator: string;
 	commitment?:CommitmentScriptDataType;
+	vout?:VoutI;
 	signed: boolean;
 	recipient: string;
 	amountSats: number;
@@ -137,8 +139,11 @@ export type PubKeySet = {
 	signature?: string;
 	paymentPublicKey: string;
 	paymentAddress: string;
+	status: CommitmentStatus;
 	mode: RevealerTxModes;
 	type: RevealerTxTypes;
+	blockHeight:number;
+	sbtcPublicKey:string;
 }
 
 export type PSBTHolder = {

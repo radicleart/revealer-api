@@ -4,9 +4,10 @@ import { hex, base64 } from '@scure/base';
 import * as btc from '@scure/btc-signer';
 import { OpReturnRequest, PSBTHolder, RevealerTransaction, RevealerTxTypes } from "../../types/revealer_types.js";
 import { broadcastBitcoinTransaction } from "../../lib/broadcast_utils.js";
-import { convertToRevealerTx, findTransactionByTxId, saveOrUpdate, updateDeposit, updateDepositForSuccessfulBroadcast } from "../../lib/transaction_db.js";
+import { convertToRevealerTx, findTransactionByTxId, saveOrUpdate, updateDeposit, updateDepositForSuccessfulBroadcast } from "../transactions/transaction_db.js";
 import { buildWithdrawalTransaction } from "../../lib/transaction/withdraw_utils.js";
 import { getHashBytesFromAddress } from "../../lib/bitcoin_utils.js";
+import { getCurrentSbtcPublicKey } from "../../lib/sbtc_utils.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns
@@ -36,7 +37,8 @@ export class OpReturnController {
         b64PSBT: base64.encode(transaction.toPSBT()),
         txFee
       }
-      const revealerTx:RevealerTransaction = convertToRevealerTx(RevealerTxTypes.SBTC_DEPOSIT, psbts, dr)
+      const sbtcPublicKey = await getCurrentSbtcPublicKey()
+      const revealerTx:RevealerTransaction = convertToRevealerTx(RevealerTxTypes.SBTC_DEPOSIT, psbts, dr, sbtcPublicKey)
       revealerTx.psbt = psbts.hexPSBT
       await saveOrUpdate(revealerTx.txId, revealerTx)
       return psbts
@@ -62,7 +64,8 @@ export class OpReturnController {
         b64PSBT: base64.encode(transaction.toPSBT()),
         txFee
       }
-      const revealerTx:RevealerTransaction = convertToRevealerTx(RevealerTxTypes.SBTC_WITHDRAWAL, psbts, wr)
+      const sbtcPublicKey = await getCurrentSbtcPublicKey()
+      const revealerTx:RevealerTransaction = convertToRevealerTx(RevealerTxTypes.SBTC_WITHDRAWAL, psbts, wr, sbtcPublicKey)
       revealerTx.psbt = psbts.hexPSBT
       await saveOrUpdate(revealerTx.txId, revealerTx)
       return psbts

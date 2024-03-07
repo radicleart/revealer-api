@@ -2,8 +2,9 @@ import { Body, Post, Route } from "tsoa";
 import { buildOpDropDepositTransaction } from "../../lib/transaction/deposit_utils.js";
 import { OpDropRequest, RevealerTransaction } from "../../types/revealer_types.js";
 import { getHashBytesFromAddress } from "../../lib/bitcoin_utils.js";
-import { convertToRevealerTxOpDrop, saveOrUpdate } from "../../lib/transaction_db.js";
+import { convertToRevealerTxOpDrop, saveOrUpdate } from "../transactions/transaction_db.js";
 import { CommitmentScriptDataType } from "sbtc-bridge-lib";
+import { getCurrentSbtcPublicKey } from "../../lib/sbtc_utils.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns
@@ -21,15 +22,16 @@ export class OpDropController {
    * @returns unsigned psbt
    */
   @Post("/get-commitment-address")
-  public async getCommitmentAddress(@Body() dd:OpDropRequest): Promise<string> {
+  public async getCommitmentAddress(@Body() dd:OpDropRequest): Promise<{commitAddress: string}> {
     try {
       const hashBytes = getHashBytesFromAddress(dd.paymentAddress)
       if (!hashBytes) throw new Error('Payment address is unknown: ' + dd.paymentAddress)
       if (!dd.recipient.startsWith('S')) throw new Error('Recipient is unknown: ' + dd.recipient) 
       const commitment:CommitmentScriptDataType = await buildOpDropDepositTransaction(dd.recipient, dd.amountSats, dd.reclaimPublicKey)
-      const revealerTx:RevealerTransaction = convertToRevealerTxOpDrop(dd, commitment)
+      const sbtcPublicKey = await getCurrentSbtcPublicKey()
+      const revealerTx:RevealerTransaction = convertToRevealerTxOpDrop(dd, commitment, sbtcPublicKey)
       await saveOrUpdate(revealerTx.txId, revealerTx)
-      return revealerTx.commitment.address
+      return { commitAddress: revealerTx.commitment.address }
     } catch(err) {
       console.error('getPsbtForDeposit: ', err)
       throw new Error(err.message);

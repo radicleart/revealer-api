@@ -1,9 +1,9 @@
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
-import { getConfig } from './config';
+import { getConfig } from './config.js';
 import { hashMessage } from '@stacks/encryption';
 import { StacksMessageType, publicKeyFromSignatureVrs } from '@stacks/transactions';
-import { getStacksAddressFromPubkey } from './transaction/payload_utils';
+import { getStacksAddressFromPubkey } from './transaction/payload_utils.js';
 
 export const REGTEST_NETWORK: typeof btc.NETWORK = { bech32: 'bcrt', pubKeyHash: 0x6f, scriptHash: 0xc4, wif: 0xc4 };
 const authMessage = 'Please sign this message to complete authentication'
