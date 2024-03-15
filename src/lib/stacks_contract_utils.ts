@@ -2,11 +2,12 @@
  * sbtc - interact with Stacks Blockchain to read sbtc contract info
  */
 import fetch from 'node-fetch';
-import { type SbtcContractDataType, type AddressObject, type AddressMempoolObject, getPegWalletAddressFromPublicKey } from 'sbtc-bridge-lib';
 import { cvToJSON, deserializeCV, principalCV, serializeCV } from '@stacks/transactions';
 import { hex } from '@scure/base';
 import { getConfig } from './config.js';
 import { BalanceI } from '../types/sbtc_ui_types.js';
+import { AddressMempoolObject, AddressObject, SbtcContractDataType } from '../types/sbtc_types.js';
+import { getPegWalletAddressFromPublicKey } from './transaction/wallet_utils.js';
 
 const limit = 10;
 

@@ -6,10 +6,17 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"RevealerTxModes": {
+				"enum": [
+					"OP_RETURN",
+					"OP_DROP"
+				],
+				"type": "string"
+			},
 			"PayloadType": {
 				"properties": {
 					"mode": {
-						"type": "string"
+						"$ref": "#/components/schemas/RevealerTxModes"
 					},
 					"eventType": {
 						"type": "string"
@@ -69,6 +76,9 @@
 						"format": "double"
 					},
 					"sbtcPublicKey": {
+						"type": "string"
+					},
+					"sbtcWallet": {
 						"type": "string"
 					}
 				},
@@ -531,13 +541,6 @@
 					4
 				],
 				"type": "number"
-			},
-			"RevealerTxModes": {
-				"enum": [
-					"OP_RETURN",
-					"OP_DROP"
-				],
-				"type": "string"
 			},
 			"RevealerTxTypes": {
 				"enum": [

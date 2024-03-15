@@ -1,6 +1,6 @@
 import { transactionCollection } from '../../lib/data/mongodb_connection.js';
 import { CommitmentStatus, OpDropRequest, OpReturnRequest, PSBTHolder, RevealerTransaction, RevealerTxModes, RevealerTxTypes } from '../../types/revealer_types.js';
-import { CommitmentScriptDataType } from 'sbtc-bridge-lib';
+import { CommitmentScriptDataType } from '../../types/sbtc_types.js';
 
 
 export async function updateDeposit(newTxId:string, oldTxId:string, signedPsbtHex?:string): Promise<RevealerTransaction> {

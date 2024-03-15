@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import { scanUnpaidTransactions } from '../transactions/transactionScanner.js';
 import { updateExchangeRates } from '../../lib/rates_utils.js';
-import { saveAllSbtcEvents } from '../events/events_helper.js';
 
 export const sbtcEventJob = cron.schedule('*/17 * * * *', (fireDate) => {
   console.log('Running: sbtcEventJob at: ' + fireDate);

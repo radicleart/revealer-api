@@ -6,12 +6,12 @@ import * as P from 'micro-packed';
 import { hashMessage } from '@stacks/encryption';
 import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
-import { recoverSignature } from "micro-stacks/connect";
 import { getAddressFromOutScript, getNet } from './wallet_utils.js';
-import { PayloadType } from 'sbtc-bridge-lib';
 import { bitcoinToSats } from './formatting.js';
 import { findTransactionByTxId } from '../../routes/transactions/transaction_db.js';
 import { CommitmentStatus, RevealerTransaction, RevealerTxModes, RevealerTxTypes } from '../../types/revealer_types.js';
+import { PayloadType } from '../../types/sbtc_types.js';
+import { StacksMessageType, publicKeyFromSignatureRsv, publicKeyFromSignatureVrs } from '@stacks/transactions';
 
 const concat = P.concatBytes;
 
@@ -369,43 +369,6 @@ export function parsePayloadFromOutput(network:string, tx:btc.Transaction):Paylo
 	const vout1Address = getAddressFromOutScript(network, tx.getOutput(1).script)
 	let payload = parseRawPayload(network, hex.encode(tx.getOutput(0).script), vout1Address, 'vrs')
 	return payload
-
-	/**
-	let witnessData = getMagicAndOpCode(d1);
-	if (witnessData.opcode !== '3C' && witnessData.opcode !== '3E') {
-		d1 = out0.script?.subarray(2) as Uint8Array // strip the op type and data length
-		witnessData = getMagicAndOpCode(d1);
-	}
-	witnessData.txType = btc.OutScript.decode(out0.script as Uint8Array).type;
-
-	let innerPayload:PayloadType = {} as PayloadType;
-	if (witnessData.opcode === '3C') {
-		innerPayload = parseDepositPayload(d1);
-		innerPayload.sbtcWallet = getAddressFromOutScript(network, tx.getOutput(1).script as Uint8Array)
-		//const inScript = btc.RawInput.encode({
-		//	index: tx.getInput(0).index || 0,
-		//	sequence: tx.getInput(0).sequence || 0,
-		//	txid: tx.getInput(0).txid as Uint8Array,
-		//	finalScriptSig: tx.getInput(0).finalScriptSig as Uint8Array,
-		//});
-		if (tx.outputsLength > 2) innerPayload.spendingAddress = getAddressFromOutScript(network, tx.getOutput(2).script!)
-		//console.log('parsePayloadFromTransaction:spendingAddress: ' +  innerPayload.spendingAddress)
-		return innerPayload;
-	} else if (witnessData.opcode.toUpperCase() === '3E') {
-		const recipient = getAddressFromOutScript(network, tx.getOutput(1).script as Uint8Array)
-		try {
-			innerPayload = parseWithdrawPayload(network, hex.encode(d1), recipient, 'vrs')
-		} catch (err:any) {
-			innerPayload = parseWithdrawPayload(network, hex.encode(d1), recipient, 'rsv')
-		}
-		innerPayload.spendingAddress = getAddressFromOutScript(network, tx.getOutput(1).script!);
-		if (tx.outputsLength > 2) innerPayload.sbtcWallet = getAddressFromOutScript(network, tx.getOutput(2).script as Uint8Array)
-		innerPayload.spendingAddress = recipient
-		return innerPayload;
-	} else {
-	  throw new Error('Wrong opcode : expected: 3E or 3C :  recieved: ' + witnessData.opcode)
-	}
-	 */
 }
 
 /**
@@ -445,6 +408,7 @@ function reverseSigBits (signature:string) {
 }
 
 function getPubkeySignature(messageHash:Uint8Array, signature:string, sigMode:'vrs'|'rsv'|undefined) {
+	/**
 	const sigM = recoverSignature({ signature: signature, mode: sigMode }); // vrs to rsv
 	let sig = new secp.Signature(sigM.signature.r, sigM.signature.s);
 	const recBit = parseInt(hex.encode(hex.decode(signature).subarray(0,1)))
@@ -455,7 +419,12 @@ function getPubkeySignature(messageHash:Uint8Array, signature:string, sigMode:'v
 	const pubkeyM = sig.recoverPublicKey(messageHash);
 	const pubkey = hex.decode(pubkeyM.toHex());
 	//console.log(pubkeyM.toHex())
-	return pubkey;
+	 */
+	let pubkey = publicKeyFromSignatureVrs(hex.encode(messageHash), { data: signature, type: StacksMessageType.MessageSignature })
+	if (sigMode === 'rsv') {
+		pubkey = publicKeyFromSignatureRsv(hex.encode(messageHash), { data: signature, type: StacksMessageType.MessageSignature })
+	}
+	return hex.decode(pubkey);
 }
 
 /**

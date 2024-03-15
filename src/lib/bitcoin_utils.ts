@@ -2,11 +2,12 @@ import * as secp from '@noble/secp256k1';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import { getConfig } from './config.js';
-import { getNet } from './utils.js';
-import { UTXO } from '../types/revealer_types.js';
+import { getNet } from './transaction/wallet_utils.js';
+import { UTXO } from '../types/sbtc_types.js';
 
 const privKey = hex.decode('0101010101010101010101010101010101010101010101010101010101010101');
 export const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
+export const REGTEST_NETWORK: typeof btc.NETWORK = { bech32: 'bcrt', pubKeyHash: 0x6f, scriptHash: 0xc4, wif: 0xc4 };
 
 export const OPTIONS = {
   method: "POST",

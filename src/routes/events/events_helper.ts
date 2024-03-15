@@ -1,17 +1,13 @@
-/**
- * sbtc - interact with Stacks Blockchain to read sbtc contract info
- */
 import { getConfig } from '../../lib/config.js';
 import fetch from 'node-fetch';
-import util from 'util'
-import { getAddressFromOutScript, type PayloadType } from 'sbtc-bridge-lib';
-import { SbtcClarityEvent } from "sbtc-bridge-lib/dist/types/sbtc_types.js";
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import { cvToJSON, deserializeCV } from '@stacks/transactions';
 import { fetchTransaction, getBlock } from '../../lib/bitcoin_utils.js';
 import { countContractEvents, findContractEventsByFilter, saveNewContractEvent } from './events_db.js';
 import { parsePayloadFromTransaction } from '../../lib/transaction/payload_utils.js';
+import { getAddressFromOutScript } from '../../lib/transaction/wallet_utils.js';
+import { PayloadType, SbtcClarityEvent } from '../../types/sbtc_types.js';
 
 const limit = 10;
 

@@ -7,10 +7,10 @@ import {
   saveSbtcEventsByStacksTx,
   saveSbtcEventsByPage,
 } from "./events_helper.js";
-import { SbtcClarityEvent } from "sbtc-bridge-lib/dist/types/sbtc_types.js";
 import { findContractEventsByPage } from "./events_db.js";
 import { sbtcContractEvents } from "../../lib/data/mongodb_connection.js";
 import { ObjectId } from "mongodb";
+import { SbtcClarityEvent } from "../../types/sbtc_types.js";
 
 export interface BalanceI {
   balance: number;

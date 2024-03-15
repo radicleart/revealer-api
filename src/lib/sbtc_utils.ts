@@ -1,6 +1,6 @@
-import { getPegWalletAddressFromPublicKey } from "sbtc-bridge-lib/dist/wallet_utils.js";
 import { SbtcWalletController } from "../routes/sbtc/SbtcWalletController.js";
 import { getConfig } from "./config.js";
+import { getPegWalletAddressFromPublicKey } from "./transaction/wallet_utils.js";
 
 export async function getCurrentSbtcPublicKey():Promise<string> {
     const controller = new SbtcWalletController();

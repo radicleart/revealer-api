@@ -3,8 +3,8 @@ import { buildOpDropDepositTransaction } from "../../lib/transaction/deposit_uti
 import { OpDropRequest, RevealerTransaction } from "../../types/revealer_types.js";
 import { getHashBytesFromAddress } from "../../lib/bitcoin_utils.js";
 import { convertToRevealerTxOpDrop, saveOrUpdate } from "../transactions/transaction_db.js";
-import { CommitmentScriptDataType } from "sbtc-bridge-lib";
 import { getCurrentSbtcPublicKey } from "../../lib/sbtc_utils.js";
+import { CommitmentScriptDataType } from "../../types/sbtc_types.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns

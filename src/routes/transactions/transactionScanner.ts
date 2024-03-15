@@ -1,12 +1,12 @@
 import { CommitmentStatus, RevealerTxModes, RevealerTransaction, RevealerTxTypes } from "../../types/revealer_types.js";
-import { fetchAddressTransactions, fetchTransaction, fetchTransactionHex } from "../../lib/bitcoin_utils.js";
+import { fetchAddressTransactions, fetchTransaction } from "../../lib/bitcoin_utils.js";
 import { findTransactionByTxId, findTransactionsByFilter, saveTransaction, updateTransaction } from "./transaction_db.js";
 import * as btc from '@scure/btc-signer';
-import { fmtNumber, parsePayloadFromTransaction } from 'sbtc-bridge-lib' 
 import { hex } from '@scure/base';
 import { getConfig } from "../../lib/config.js";
-import { convertToRevealerTransaction, parseRawPayload } from "../../lib/transaction/payload_utils.js";
-import { getNet } from "../../lib/utils.js";
+import { convertToRevealerTransaction, parsePayloadFromTransaction, parseRawPayload } from "../../lib/transaction/payload_utils.js";
+import { fmtNumber } from "../../lib/transaction/formatting.js";
+import { getNet } from "../../lib/transaction/wallet_utils.js";
 
 export async function scanBySbtcWallet(sbtcWalletAddress:string, addressTxs:Array<any>) {
 	try {
@@ -132,28 +132,6 @@ async function unpaidOpReturn(revealerTx:RevealerTransaction):Promise<RevealerTr
 	if (rTx) {
 		return rTx as unknown as RevealerTransaction
 	}
-
-	/**
-	for (let i = 0; i<tx.outputsLength; i++) {
-	  const outp = tx.getOutput(i);
-	  const addr = getAddressFromOutScript(getConfig().network, outp.script)
-
-	const sbtcWalletPublicKey = await getCurrentSbtcPublicKey()
-  
-	  if (addr === getPegWalletAddressFromPublicKey(getConfig().network, sbtcWalletPublicKey)) {
-		if (Number(outp.amount) === revealerTx.amountSats) {
-			const up = {
-				vout0: tx.getOutput(0),
-				vout: outp,
-				status: CommitmentStatus.PAID
-			}
-			const rTx = await updateTransaction(revealerTx.txId, up);
-			if (rTx) {
-				return rTx as unknown as RevealerTransaction
-			}
-		}
-	  }
-	} */
 }
   
 async function getBitcoinTxId(revealerTx:RevealerTransaction):Promise<string|undefined> {

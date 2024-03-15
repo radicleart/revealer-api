@@ -1,9 +1,9 @@
 import { Get, Route } from "tsoa";
 import { getFeeEstimate, getKeys, getRates } from "../../lib/rates_utils.js";
-import { AddressObject } from "sbtc-bridge-lib";
 import { fetchBalancesForUser, fetchSbtcContractData, fetchUserSbtcBalance } from "../../lib/stacks_contract_utils.js";
 import { BalanceI, UIObject } from "../../types/sbtc_ui_types.js";
 import { fetchTransaction, getBlock } from "../../lib/bitcoin_utils.js";
+import { AddressObject } from "../../types/sbtc_types.js";
 
 export let cachedUIObject:UIObject;
 

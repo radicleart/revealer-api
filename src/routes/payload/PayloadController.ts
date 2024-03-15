@@ -3,7 +3,7 @@ import { hex } from '@scure/base';
 import { getConfig } from "../../lib/config.js";
 import { fetchTransactionHex } from "../../lib/bitcoin_utils.js";
 import { buildDepositPayload, buildDepositPayloadOpDrop, buildWithdrawPayload, buildWithdrawPayloadOpDrop, parseDepositPayload, parsePayloadFromTransaction, parseRawPayload, parseWithdrawPayload } from "../../lib/transaction/payload_utils.js";
-import { PayloadType } from "sbtc-bridge-lib";
+import { PayloadType } from "../../types/sbtc_types.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns

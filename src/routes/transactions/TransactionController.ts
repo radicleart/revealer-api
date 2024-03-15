@@ -1,7 +1,7 @@
 import { Body, Get, Post, Route } from "tsoa";
 import { RevealerTransaction } from "../../types/revealer_types.js";
 import { fetchAddressTransactions, getHashBytesFromAddress } from "../../lib/bitcoin_utils.js";
-import { countTransactionsByFilter, findOldestTransactionByHeight, findTransactionByCommitAddress, findTransactionByTxId, findTransactionsByFilter, saveOrUpdate } from "./transaction_db.js";
+import { countTransactionsByFilter, findOldestTransactionByHeight, findTransactionByCommitAddress, findTransactionByTxId, findTransactionsByFilter } from "./transaction_db.js";
 import { scanBySbtcWallet, scanBySbtcWalletTransaction, scanUnpaidTransactions, scanSpecificCommitment, unpaidOpDrop } from "./transactionScanner.js";
 import { getPegWalletAddressFromPublicKey } from "../../lib/transaction/wallet_utils.js";
 import { getConfig } from "../../lib/config.js";

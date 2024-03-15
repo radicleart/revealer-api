@@ -1,12 +1,13 @@
 import { Body, Get, Post, Route } from "tsoa";
 import { getConfig } from "../../lib/config.js";
-import { CommitmentRequest, CommitmentResponse, RequestType, CommitmentError } from "../../types/revealer_types.js";
-import { getNet } from "sbtc-bridge-lib/dist/wallet_utils.js";
-import { UTXO, toStorable } from "sbtc-bridge-lib";
+import { CommitmentRequest, CommitmentResponse } from "../../types/revealer_types.js";
 import * as btc from '@scure/btc-signer';
 import { addInputs, fetchUtxoSet, inputAmt } from "../../lib/bitcoin_utils.js";
 import { hex } from '@scure/base';
 import { utf8ToBytes } from "@noble/curves/abstract/utils.js";
+import { getNet } from "../../lib/transaction/wallet_utils.js";
+import { toStorable } from "../../lib/transaction/payload_utils.js";
+import { UTXO } from "../../types/sbtc_types.js";
 
 /**
  * Builds and stores commitment transactions for sbtc commit reveal patterns
