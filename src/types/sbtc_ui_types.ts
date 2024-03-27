@@ -1,4 +1,4 @@
-import { ExchangeRate, KeySet, SbtcContractDataType } from "sbtc-bridge-lib";
+import { ExchangeRate, KeySet, SbtcContractDataType } from "./sbtc_types";
 
 export interface FeeEstimateResponse {
 	feeInfo: {

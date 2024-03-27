@@ -2,11 +2,12 @@ import * as secp from '@noble/secp256k1';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import { getConfig } from './config.js';
-import { getNet } from './utils.js';
-import { UTXO } from '../types/revealer_types.js';
+import { getNet } from './transaction/wallet_utils.js';
+import { UTXO } from '../types/sbtc_types.js';
 
 const privKey = hex.decode('0101010101010101010101010101010101010101010101010101010101010101');
 export const BASE_URL = `http://${getConfig().btcRpcUser}:${getConfig().btcRpcPwd}@${getConfig().btcNode}${getConfig().walletPath}`;
+export const REGTEST_NETWORK: typeof btc.NETWORK = { bech32: 'bcrt', pubKeyHash: 0x6f, scriptHash: 0xc4, wif: 0xc4 };
 
 export const OPTIONS = {
   method: "POST",
@@ -61,10 +62,8 @@ export function getAddressFromHashBytes(hashBytes:string, version:string) {
   
 export function getHashBytesFromAddress(address:string):{version:string, hashBytes:string }|undefined {
 	const net = (getConfig().network === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
-	let outScript:any;
 	try {
 	  const addr:any = btc.Address(net);
-	  //const outScript = btc.OutScript.encode(addr.decode(address));
 	  const s = btc.OutScript.encode(addr.decode(address))
 	  const outScript = btc.OutScript.decode(s);
 	  if (outScript.type === "ms") {
@@ -82,7 +81,7 @@ export function getHashBytesFromAddress(address:string):{version:string, hashByt
 	  }
 	  return
 	} catch (err:any) {
-	  console.error('getHashBytesFromAddress: un hash-byteable address' + address)
+	  console.error('getHashBytesFromAddress: un hash-able address: ' + address)
 	}
 	return
 }
@@ -115,7 +114,52 @@ export async function fetchUtxoSet(address:string, verbose:boolean): Promise<any
     return result;
 }
   
-async function fetchTransaction(txid:string, verbose:boolean) {
+export async function getBlock(hash:string, verbosity:number) {
+	const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getblock","params":["${hash}", ${verbosity}]}`;
+	OPTIONS.body = dataString;
+	let res;
+	try {
+		const response = await fetch(BASE_URL, OPTIONS);
+		await handleError(response, 'getBlock error: ');
+		const result = await response.json();
+		return result.result;
+	} catch (err) {}
+	if (!res) {
+		try {
+			let url = getConfig().mempoolUrl + '/block/' + hash;
+			let response = await fetch(url);
+			if (response.status !== 200) throw new Error('getBlock: Unable to fetch transaction for: ' + hash);
+			const blockM = await response.json();
+
+			const block = {
+				versionHex: blockM.version,
+				previousblockhash: blockM.previousblockhash,
+				merkleroot: blockM.merkle_root,
+				time: blockM.timestamp,
+				bits: blockM.bits,
+				nonce: blockM.nonce,
+				hash: blockM.id,
+				...blockM
+			} as any
+
+			url = getConfig().mempoolUrl + '/block/' + hash + '/txids';
+			response = await fetch(url);
+			const tx = await response.json();
+
+			block.tx = tx
+
+			return block;
+		} catch(err) {
+			console.log(err)
+			return;
+		}
+	}
+	return res;
+}
+  
+export async function fetchTransaction(txid:string, verbose:boolean) {
+	if (txid.split(':').length > 0) return;
+
 	let dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getrawtransaction","params":["${txid}", ${verbose}]}`;
 	OPTIONS.body = dataString; 
 	let res;
@@ -130,14 +174,50 @@ async function fetchTransaction(txid:string, verbose:boolean) {
 	}
 	return res;
 }
+export async function fetchTransactionHex(txid:string) {
+	try {
+	  //https://api.blockcypher.com/v1/btc/test3/txs/<txID here>?includeHex=true
+	  //https://mempool.space/api/tx/15e10745f15593a899cef391191bdd3d7c12412cc4696b7bcb669d0feadc8521/hex
+	  const url = getConfig().mempoolUrl + '/tx/' + txid + '/hex';
+	  const response = await fetch(url);
+	  const hex = await response.text();
+	  return hex;
+	} catch(err) {
+	  console.log(err)
+	  return;
+	}
+  }
   
-export async function fetchAddressTransactions(address:string, lastId?:string) {
-	let url = getConfig().mempoolUrl + '/address/' + address + '/txs';
-	if (lastId) url += '/' + lastId
-	const response = await fetch(url);
-	const result = await response.json();
-	return result;
-}
+export async function fetchAddressTransactions(address:string, txId?:string) {
+	const urlBase = getConfig().mempoolUrl + '/address/' + address + '/txs';
+	let url = urlBase
+	if (txId) {
+		url = urlBase + '/chain/' + txId;
+	}
+	console.log('fetchAddressTransactions: url: ' + url)
+	let response:any;
+	let allResults:Array<any> = [];
+	let results:Array<any>;
+	let fetchMore = true;
+	do {
+		try {
+			response = await fetch(url);
+			results = await response.json();
+			if (results && results.length > 0) {
+				console.log('fetchAddressTransactions: ' + results.length + ' found at ' + results[(results.length-1)].status.block_height)
+				url = urlBase + '/chain/' + results[(results.length-1)].txid;
+				allResults = allResults.concat(results)
+			} else {
+			  fetchMore = false
+			}
+		} catch(err:any) {
+			console.error('fetchAddressTransactions' + err.message)
+			fetchMore = false
+		}
+	} while (fetchMore);
+	console.log('fetchAddressTransactions: total of ' + allResults.length + ' found at ' + address)
+	return allResults;
+  } 
   
 /**
  * getAddressFromOutScript converts a script to an address
@@ -407,7 +487,7 @@ async function mempoolFetchTransactionHex(txid:string) {
 	try {
 	  const url = getConfig().mempoolUrl + '/tx/' + txid;
 	  const response = await fetch(url);
-	  if (response.status !== 200) throw new Error('Unable to fetch transaction for: ' + txid);
+	  if (response.status !== 200) throw new Error('mempoolFetchTransaction: Unable to fetch transaction for: ' + txid);
 	  const tx = await response.json();
 	  return tx;
 	} catch(err) {

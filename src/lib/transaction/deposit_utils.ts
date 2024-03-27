@@ -1,16 +1,16 @@
 import * as btc from '@scure/btc-signer';
-import * as secp from '@noble/secp256k1';
 import * as P from 'micro-packed';
 import { hex } from '@scure/base';
 import type { Transaction } from '@scure/btc-signer' 
-import { buildDepositPayload } from './payload_utils.js' 
+import { buildDepositPayload, buildDepositPayloadOpDrop, toStorable } from './payload_utils.js' 
 import { addInputs, getNet, getPegWalletAddressFromPublicKey, inputAmt } from './wallet_utils.js';
-import { BridgeTransactionType, CommitmentScriptDataType, buildDepositPayloadOpDrop, toStorable } from 'sbtc-bridge-lib';
-import { UTXO } from '../../types/revealer_types.js';
+import { UTXO } from '../../types/sbtc_types.js';
 import { fetchUtxoSet } from '../bitcoin_utils.js';
 import { getConfig } from '../config.js';
 import { SbtcWalletController } from '../../routes/sbtc/SbtcWalletController.js';
 import { FeeEstimateResponse } from '../../types/sbtc_ui_types.js';
+import { getCurrentSbtcPublicKey } from '../sbtc_utils.js';
+import { CommitmentScriptDataType } from '../../types/sbtc_types.js';
 
 
 const concat = P.concatBytes;
@@ -88,9 +88,7 @@ export function estimateActualFee (tx:btc.Transaction, feeInfo:any):number {
 export async function buildOpDropDepositTransaction(recipient:string, amountSats:number, reclaimPublicKey:string):Promise<CommitmentScriptDataType> {
 	const network = getConfig().network
 	const net = getNet(getConfig().network);
-	const controller = new SbtcWalletController();
-	const cachedUIObject = await (controller.initUi())
-	const sbtcWalletPublicKey = cachedUIObject.sbtcContractData.sbtcWalletPublicKey
+	const sbtcWalletPublicKey = await getCurrentSbtcPublicKey()
 
 	const data = buildData(network, recipient, amountSats);
 	const scripts =  [

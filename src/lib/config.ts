@@ -1,4 +1,4 @@
-import { ConfigI } from "../types/revealer_types";
+import { ConfigI } from "../types/revealer_types.js";
 
 let CONFIG= {} as ConfigI;
 
@@ -59,6 +59,8 @@ const LOCAL_DEVNET_CONFIG = {
 
 export function printConfig() {
   console.log('== ' + process.env.NODE_ENV + ' ==========================================================')
+  console.log('CONFIG.network = ' + CONFIG.network)
+  console.log('CONFIG.mongoDbUrl = ' + CONFIG.mongoDbUrl)
   console.log('CONFIG.mongoDbName = ' + CONFIG.mongoDbName)
   console.log('CONFIG.mongoUser = ' + CONFIG.mongoUser)
   console.log('CONFIG.mongoPwd = ' + CONFIG.mongoPwd.substring(0,2))
@@ -92,7 +94,7 @@ export function setConfigOnStart() {
     CONFIG = {...DEVNET_CONFIG, ...LOCAL_TESTNET_CONFIG}
   } else {
     CONFIG.host = process.env.host || '';
-    CONFIG.port = Number(process.env.port) || 5010;
+    CONFIG.port = Number(process.env.port) || 4010;
     CONFIG.walletPath = process.env.walletPath || '';
     CONFIG.sbtcContractId = process.env.sbtcContractId || '';
     CONFIG.stacksApi = process.env.stacksApi || '';

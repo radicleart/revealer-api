@@ -1,5 +1,4 @@
-import { Document } from "mongodb";
-import { CommitmentScriptDataType, VoutI } from "sbtc-bridge-lib";
+import { CommitmentScriptDataType, VoutI } from "./sbtc_types";
 
 export enum RevealerTxTypes {
 	SBTC_DEPOSIT = 'SBTC_DEPOSIT',
@@ -12,10 +11,11 @@ export enum RevealerTxModes {
 }
 
 export enum CommitmentStatus {
-	UNPAID = 'UNPAID',
-	PAID = 'PAID',
-	REVEALED = 'REVEALED',
-	RECLAIMED = 'RECLAIMED',
+	UNPAID = 0,
+	PENDING = 1,
+	PAID = 2,
+	REVEALED = 3,
+	RECLAIMED = 4,
 }
 
 export enum RequestType {
@@ -128,6 +128,7 @@ export type PubKeySet = {
 	psbt?: string;
 	originator: string;
 	commitment?:CommitmentScriptDataType;
+	vout?:VoutI;
 	signed: boolean;
 	recipient: string;
 	amountSats: number;
@@ -137,8 +138,11 @@ export type PubKeySet = {
 	signature?: string;
 	paymentPublicKey: string;
 	paymentAddress: string;
+	status: CommitmentStatus;
 	mode: RevealerTxModes;
 	type: RevealerTxTypes;
+	blockHeight:number;
+	sbtcPublicKey:string;
 }
 
 export type PSBTHolder = {
@@ -161,23 +165,4 @@ export type PSBTHolder = {
 	tweakedPubkey?:string|Uint8Array;
   }
   
-  export type UTXO = {
-	txid: string;
-	vout: number;
-	fullout?: {
-	  scriptpubkey:string;
-	  scriptpubkey_address:string;
-	  scriptpubkey_asm:string;
-	  scriptpubkey_type:string;
-	  value:number;
-	};
-	tx: any;
-	status: {
-	  confirmed: boolean;
-	  block_height?: number;
-	  block_hash?: string;
-	  block_time?: number;
-	};
-	value: number;
-  };
   

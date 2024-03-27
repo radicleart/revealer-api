@@ -1,10 +1,10 @@
-import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
+import { MongoClient, ServerApiVersion } from 'mongodb';
 import type { Collection } from 'mongodb';
 import { getConfig } from '../config.js';
 
-export let commitmentCollection:Collection;
 export let transactionCollection:Collection;
 export let exchangeRatesCollection:Collection;
+export let sbtcContractEvents:Collection;
 
 export async function connect() {
 	let uriPrefix:string = 'mongodb+srv'
@@ -14,8 +14,8 @@ export async function connect() {
 	  // A FQDN is not required for development.
 	  uriPrefix = 'mongodb'
 	}
-	const uri = `${uriPrefix}://${getConfig().mongoUser}:${getConfig().mongoPwd}@${getConfig().mongoDbUrl}/?retryWrites=true&w=majority`;
-	// console.log("Mongo: " + uri);
+	const uri = `${uriPrefix}://${getConfig().mongoUser}:${getConfig().mongoPwd}@${getConfig().mongoDbUrl}/${getConfig().mongoDbName}?retryWrites=true&w=majority`;
+	//console.log("Mongo: " + uri);
 
 	// The MongoClient is the object that references the connection to our
 	// datastore (Atlas, for example)
@@ -38,13 +38,13 @@ export async function connect() {
 	// operations on them.
 	const database = client.db(getConfig().mongoDbName);
 	
-	commitmentCollection = database.collection('commitmentCollection');
-	await commitmentCollection.createIndex({'taprootScript.address': 1}, { unique: true })
-	await commitmentCollection.createIndex({'originator': 1, 'commitTxId': 1, 'requestType': 1, 'status': 1}, { unique: true })
-
 	exchangeRatesCollection = database.collection('exchangeRatesCollection');
 	await exchangeRatesCollection.createIndex({currency: 1}, { unique: true })
 
 	transactionCollection = database.collection('transactionCollection');
 	await transactionCollection.createIndex({txId: 1}, { unique: true })
+
+	sbtcContractEvents = database.collection('sbtcContractEvents');
+	await sbtcContractEvents.createIndex({'contractId': 1, 'txid': 1}, { unique: true })
+
 }

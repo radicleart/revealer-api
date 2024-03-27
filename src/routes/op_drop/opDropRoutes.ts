@@ -1,5 +1,5 @@
 import express from "express";
-import { OpDropRequest, OpReturnRequest } from "../../types/revealer_types.js";
+import { OpDropRequest } from "../../types/revealer_types.js";
 import { OpDropController } from "./OpDropController.js";
 
 const router = express.Router();

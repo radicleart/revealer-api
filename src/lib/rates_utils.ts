@@ -1,11 +1,11 @@
 import { hex, base64 } from '@scure/base';
 import { schnorr } from '@noble/curves/secp256k1';
 import { exchangeRatesCollection } from './data/mongodb_connection.js';
-import { ExchangeRate, KeySet } from 'sbtc-bridge-lib';
 import { getConfig } from './config.js';
 import { currencies } from './utils_currencies.js';
 import { BASE_URL, OPTIONS, handleError } from './bitcoin_utils.js';
 import { FeeEstimateResponse } from '../types/sbtc_ui_types.js';
+import { ExchangeRate, KeySet } from '../types/sbtc_types.js';
 
 export function getKeys(): KeySet {
     return {
