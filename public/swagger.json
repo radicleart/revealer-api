@@ -1228,7 +1228,7 @@
 						}
 					}
 				},
-				"description": "Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.",
+				"description": "Build an sBTC deposit PSBT.",
 				"security": [],
 				"parameters": [],
 				"requestBody": {

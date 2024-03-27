@@ -62,10 +62,8 @@ export function getAddressFromHashBytes(hashBytes:string, version:string) {
   
 export function getHashBytesFromAddress(address:string):{version:string, hashBytes:string }|undefined {
 	const net = (getConfig().network === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
-	let outScript:any;
 	try {
 	  const addr:any = btc.Address(net);
-	  //const outScript = btc.OutScript.encode(addr.decode(address));
 	  const s = btc.OutScript.encode(addr.decode(address))
 	  const outScript = btc.OutScript.decode(s);
 	  if (outScript.type === "ms") {
@@ -83,7 +81,7 @@ export function getHashBytesFromAddress(address:string):{version:string, hashByt
 	  }
 	  return
 	} catch (err:any) {
-	  console.error('getHashBytesFromAddress: un hash-byteable address' + address)
+	  console.error('getHashBytesFromAddress: un hash-able address: ' + address)
 	}
 	return
 }
@@ -130,7 +128,7 @@ export async function getBlock(hash:string, verbosity:number) {
 		try {
 			let url = getConfig().mempoolUrl + '/block/' + hash;
 			let response = await fetch(url);
-			if (response.status !== 200) throw new Error('Unable to fetch transaction for: ' + hash);
+			if (response.status !== 200) throw new Error('getBlock: Unable to fetch transaction for: ' + hash);
 			const blockM = await response.json();
 
 			const block = {
@@ -160,6 +158,8 @@ export async function getBlock(hash:string, verbosity:number) {
 }
   
 export async function fetchTransaction(txid:string, verbose:boolean) {
+	if (txid.split(':').length > 0) return;
+
 	let dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getrawtransaction","params":["${txid}", ${verbose}]}`;
 	OPTIONS.body = dataString; 
 	let res;
@@ -487,7 +487,7 @@ async function mempoolFetchTransactionHex(txid:string) {
 	try {
 	  const url = getConfig().mempoolUrl + '/tx/' + txid;
 	  const response = await fetch(url);
-	  if (response.status !== 200) throw new Error('Unable to fetch transaction for: ' + txid);
+	  if (response.status !== 200) throw new Error('mempoolFetchTransaction: Unable to fetch transaction for: ' + txid);
 	  const tx = await response.json();
 	  return tx;
 	} catch(err) {

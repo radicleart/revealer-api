@@ -13,10 +13,11 @@ import { CommitmentScriptDataType } from "../../types/sbtc_types.js";
 export class OpDropController {
   
   /**
-   * Build an sBTC deposit PSBT using OP_RETURN for the user to sign and sed.
+   * Build an sBTC deposit PSBT.
+   * @param originator stacks address for book keeping
    * @param recipient stacks account or contract principle to receive sBTC 
    * @param amountSats amount user wishes to deposit 
-   * @param paymentPublicKey public key to spend utxos
+   * @param reclaimPublicKey public key user can claim refunds
    * @param paymentAddress address for utxo - most likely users wallet bitcoin address but does not have to be. 
    * Also used for change address to send deposit from
    * @returns unsigned psbt
@@ -24,8 +25,8 @@ export class OpDropController {
   @Post("/get-commitment-address")
   public async getCommitmentAddress(@Body() dd:OpDropRequest): Promise<{commitAddress: string}> {
     try {
-      const hashBytes = getHashBytesFromAddress(dd.paymentAddress)
-      if (!hashBytes) throw new Error('Payment address is unknown: ' + dd.paymentAddress)
+      //const hashBytes = getHashBytesFromAddress(dd.paymentAddress)
+      //if (!hashBytes) throw new Error('Payment address is unknown: ' + dd.paymentAddress)
       if (!dd.recipient.startsWith('S')) throw new Error('Recipient is unknown: ' + dd.recipient) 
       const commitment:CommitmentScriptDataType = await buildOpDropDepositTransaction(dd.recipient, dd.amountSats, dd.reclaimPublicKey)
       const sbtcPublicKey = await getCurrentSbtcPublicKey()

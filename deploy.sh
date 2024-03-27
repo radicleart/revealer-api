@@ -3,21 +3,18 @@
 ############################################################
 
 export DEPLOYMENT=$1
-export PORT=7019
-export SERVER=chomsky.brightblock.org
+export PORT=22
+export SERVER=leibniz.brightblock.org
 export DOCKER_NAME=revealer_api_staging
 export TARGET_ENV=linode-staging
 if [ "$DEPLOYMENT" == "prod" ]; then
   SERVER=spinoza.brightblock.org
   DOCKER_NAME=revealer_api_production
   TARGET_ENV=linode-production
-  PORT=22
 elif [ "$DEPLOYMENT" == "devnet" ]; then
   SERVER=rawls.brightblock.org
   DOCKER_NAME=revealer_api_staging
   TARGET_ENV=linode-staging
-  PORT=22
-
 fi
 export DOCKER_ID_USER='mijoco'
 export DOCKER_CMD='docker'

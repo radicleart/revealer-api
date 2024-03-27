@@ -59,6 +59,7 @@ const LOCAL_DEVNET_CONFIG = {
 
 export function printConfig() {
   console.log('== ' + process.env.NODE_ENV + ' ==========================================================')
+  console.log('CONFIG.network = ' + CONFIG.network)
   console.log('CONFIG.mongoDbUrl = ' + CONFIG.mongoDbUrl)
   console.log('CONFIG.mongoDbName = ' + CONFIG.mongoDbName)
   console.log('CONFIG.mongoUser = ' + CONFIG.mongoUser)

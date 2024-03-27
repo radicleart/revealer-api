@@ -27,8 +27,8 @@ export class OpReturnController {
   @Post("/get-psbt-for-deposit")
   public async getPsbtForDeposit(@Body() dr:OpReturnRequest): Promise<PSBTHolder|undefined> {
     try {
-      const hashBytes = getHashBytesFromAddress(dr.paymentAddress)
-      if (!hashBytes) throw new Error('Payment address is unknown: ' + dr.paymentAddress)
+      //const hashBytes = getHashBytesFromAddress(dr.paymentAddress)
+      //if (!hashBytes) throw new Error('Payment address is unknown: ' + dr.paymentAddress)
       if (!dr.recipient.startsWith('S')) throw new Error('Recipient is unknown: ' + dr.recipient) 
       const {transaction, txFee} = await buildOpReturnDepositTransaction(dr.recipient, dr.amountSats, dr.paymentPublicKey, dr.paymentAddress, dr.feeMultiplier)
       if (!transaction) return
@@ -55,8 +55,8 @@ export class OpReturnController {
   @Post("/get-psbt-for-withdrawal")
   public async getPsbtForWithdrawal(@Body() wr:OpReturnRequest): Promise<PSBTHolder|undefined> {
     try {
-      const hashBytes = getHashBytesFromAddress(wr.recipient)
-      if (!hashBytes) throw new Error('Recipient is unknown: ' + wr.recipient)
+      //const hashBytes = getHashBytesFromAddress(wr.recipient)
+      //if (!hashBytes) throw new Error('Recipient is unknown: ' + wr.recipient)
       const {transaction, txFee} = await buildWithdrawalTransaction(wr.recipient, wr.signature, wr.amountSats, wr.paymentPublicKey, wr.paymentAddress, wr.feeMultiplier)
       if (!transaction) return
       const psbts = {
