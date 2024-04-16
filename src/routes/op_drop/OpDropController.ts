@@ -31,7 +31,7 @@ export class OpDropController {
       const commitment:CommitmentScriptDataType = await buildOpDropDepositTransaction(dd.recipient, dd.amountSats, dd.reclaimPublicKey)
       const sbtcPublicKey = await getCurrentSbtcPublicKey()
       const revealerTx:RevealerTransaction = convertToRevealerTxOpDrop(dd, commitment, sbtcPublicKey)
-      await saveOrUpdate(revealerTx.txId, revealerTx)
+      await saveOrUpdate(revealerTx.txId, revealerTx )
       return { commitAddress: revealerTx.commitment.address }
     } catch(err) {
       console.error('getPsbtForDeposit: ', err)

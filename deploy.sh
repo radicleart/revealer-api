@@ -39,19 +39,7 @@ $DOCKER_CMD push mijoco/revealer_api:latest
 
     docker rm -f ${DOCKER_NAME}
     source /home/bob/.profile;
-    docker run -d -t -i --name ${DOCKER_NAME} -p 4010:4010 \
-      -e TARGET_ENV=${TARGET_ENV} \
-      -e mongoDbUrl=${UASU_MONGO_SBTC_URL} \
-      -e mongoDbName=revealer1 \
-      -e mongoUser=${UASU_MONGO_SBTC_USER} \
-      -e mongoPwd=${UASU_MONGO_SBTC_PWD} \
-      -e btcNode=${UASU_BTC_NODE} \
-      -e btcRpcUser=${UASU_BTC_RPC_USER} \
-      -e btcRpcPwd=${UASU_BTC_RPC_PWD} \
-      -e btcSchnorrReveal=${UASU_BTC_SCHNORR_KEY_REVEAL} \
-      -e btcSchnorrReclaim=${UASU_BTC_SCHNORR_KEY_RECLAIM} \
-      -e btcSchnorrOracle=${UASU_BTC_SCHNORR_KEY_ORACLE} \
-      mijoco/revealer_api
+    docker run -d -t -i --network host --name ${DOCKER_NAME} -p 4010:4010 -e TARGET_ENV='linode-production' -e btcRpcUser=${REVEALER_BTC_RPC_USER} -e btcRpcPwd=${REVEALER_BTC_RPC_PWD} -e btcNode=${REVEALER_BTC_NODE} -e mongoDbUrl=${REVEALER_MONGO_URL} -e mongoDbName=${REVEALER_MONGO_DBNAME} -e mongoUser=${REVEALER_MONGO_USER} -e mongoPwd=${REVEALER_MONGO_PWD} -e sbtcContractId=${REVEALER_SBTC_CONTRACT_ID} -e poxContractId=${POX_CONTRACT_ID} -e stacksApi=${REVEALER_STACKS_API} -e bitcoinExplorerUrl=${REVEALER_BITCOIN_EXPLORER_URL} -e mempoolUrl=${REVEALER_MEMPOOL_URL} -e blockCypherUrl=${REVEALER_BLOCK_CYPHER_URL} -e publicAppName=${REVEALER_PUBLIC_APP} -e publicAppVersion=${REVEALER_PUBLIC_APP_VERSION} -e host=${REVEALER_HOST} -e port=${REVEALER_PORT} -e walletPath=${REVEALER_WALLET_PATH} mijoco/revealer_api
   ";
 
 printf "Finished....\n"

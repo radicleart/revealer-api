@@ -123,7 +123,7 @@ export function convertToRevealerTxOpDrop(req:OpDropRequest, commitment:Commitme
     txId,
     signed: false,
     originator: req.originator, 
-    recipient: req.recipient, 
+    recipient: req.recipient,
     amountSats: req.amountSats,
     commitment,
     confirmations: -1,

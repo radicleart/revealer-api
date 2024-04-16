@@ -132,6 +132,18 @@ router.get("/get-revealer-transactions/:page/:limit", async (req, res, next) => 
   }
 });
 
+router.get("/count-revealer-transactions", async (req, res, next) => {
+  try {
+    const response = await controller.countRevealerTransactions();
+    if (response) {
+      return res.send(response);
+    }
+    return res.status(404).send({failed: true, message: 'none here'}); //Send error response here
+  } catch (error) {
+    return res.status(500).send({failed: true, message: error.message})
+  }
+});
+
 router.get('*', function(req, res) {
   res.sendStatus(404);
 });

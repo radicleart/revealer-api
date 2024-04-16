@@ -116,6 +116,21 @@ export class TransactionController {
   }
 
 
+  @Get("/count-revealer-transactions")
+  public async countRevealerTransactions(): Promise<any> {
+    try {
+      const total = await countTransactionsByFilter({})
+      const deposits = await countTransactionsByFilter({type:'SBTC_DEPOSIT'})
+      const depositsOpDrop = await countTransactionsByFilter({type:'SBTC_DEPOSIT', mode: 'OP_DROP'})
+      const depositsOpReturn = await countTransactionsByFilter({type:'SBTC_DEPOSIT', mode: 'OP_RETURN'})
+      const withdrawals = await countTransactionsByFilter({type:'SBTC_WITHDRAWAL'})
+      return {deposits, depositsOpDrop, depositsOpReturn, withdrawals, total}
+    } catch(err) {
+      console.error('getCommitmentTransactions: ', err)
+      throw new Error(err.message);
+    }
+  }
+
   @Get("/get-revealer-transactions/:page/:limit")
   public async getRevealerTransactions(page:number, limit:number): Promise<any> {
     try {

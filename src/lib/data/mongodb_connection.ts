@@ -32,7 +32,6 @@ export async function connect() {
 	// is required.
 	await client.connect();
 	await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
 	
 	// Create references to the database and collection in order to run
 	// operations on them.

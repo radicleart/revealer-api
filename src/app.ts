@@ -62,6 +62,7 @@ console.log('Startup Environment: ', process.env.TARGET_ENV);
 console.log(`Mongo connection at ${getConfig().mongoDbUrl}\n\n`);
 async function connectToMongoCloud() {
   await connect();
+  console.log("Pinged your deployment. You successfully connected to MongoDB!");
   const server = app.listen(getConfig().port, () => {
     return;
   });

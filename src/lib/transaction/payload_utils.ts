@@ -15,8 +15,20 @@ import { StacksMessageType, publicKeyFromSignatureRsv, publicKeyFromSignatureVrs
 
 const concat = P.concatBytes;
 
-export const MAGIC_BYTES_TESTNET = '5432';
+/**
+ * Mainnet magic
+ * 5832 => X2
+ * Testnet magic
+ * hex     utf8
+ * 4e33 => NE
+ * 5432 => T2
+ * 4845 => HE ??
+ * 5255 => RU ??
+ */
+export const MAGIC_BYTES_TESTNET = '5432';  // 
+export const MAGIC_BYTES_TESTNET_NAK = '4e33';
 export const MAGIC_BYTES_MAINNET = '5832';
+export const MAGIC_BYTES_MAINNET_NAK = '5832';
 export const PEGIN_OPCODE = '3C';
 export const PEGOUT_OPCODE = '3E';
 
