@@ -1860,6 +1860,23 @@
 				]
 			}
 		},
+		"/revealer-api/v1/transactions/count-revealer-transactions": {
+			"get": {
+				"operationId": "CountRevealerTransactions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/revealer-api/v1/transactions/get-revealer-transactions/{page}/{limit}": {
 			"get": {
 				"operationId": "GetRevealerTransactions",

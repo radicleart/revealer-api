@@ -2,8 +2,6 @@
 
 Node Server for REVEALER proxy server.
 
-@deprecated
-
 ## Swagger API Docs
 
 - [swagger docs](https://revealer.bridge.sbtc.tech/revealer-api/).
